@@ -2,7 +2,7 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Sound.css";
-import { text } from "@fortawesome/fontawesome-svg-core";
+// import { text } from "@fortawesome/fontawesome-svg-core";
 // import { randomInt } from "mathjs";
 
 const truncate = (input) => {
