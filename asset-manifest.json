@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/SteganoHelper/static/css/main.caa7a5e0.chunk.css",
+    "main.js": "/SteganoHelper/static/js/main.7ce806f3.chunk.js",
+    "main.js.map": "/SteganoHelper/static/js/main.7ce806f3.chunk.js.map",
+    "runtime-main.js": "/SteganoHelper/static/js/runtime-main.2dd9f866.js",
+    "runtime-main.js.map": "/SteganoHelper/static/js/runtime-main.2dd9f866.js.map",
+    "static/js/2.704aac93.chunk.js": "/SteganoHelper/static/js/2.704aac93.chunk.js",
+    "static/js/2.704aac93.chunk.js.map": "/SteganoHelper/static/js/2.704aac93.chunk.js.map",
+    "index.html": "/SteganoHelper/index.html",
+    "precache-manifest.dcd5795354aad331cdec7219e456d7be.js": "/SteganoHelper/precache-manifest.dcd5795354aad331cdec7219e456d7be.js",
+    "service-worker.js": "/SteganoHelper/service-worker.js",
+    "static/css/main.caa7a5e0.chunk.css.map": "/SteganoHelper/static/css/main.caa7a5e0.chunk.css.map",
+    "static/js/2.704aac93.chunk.js.LICENSE.txt": "/SteganoHelper/static/js/2.704aac93.chunk.js.LICENSE.txt",
+    "static/media/logo.png": "/SteganoHelper/static/media/logo.2fc24170.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.2dd9f866.js",
+    "static/js/2.704aac93.chunk.js",
+    "static/css/main.caa7a5e0.chunk.css",
+    "static/js/main.7ce806f3.chunk.js"
+  ]
+}
