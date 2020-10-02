@@ -2,8 +2,8 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Sound.css";
+var seedrandom = require('seedrandom');
 // import { text } from "@fortawesome/fontawesome-svg-core";
-// import { randomInt } from "mathjs";
 
 let ExtVigenere = require("../../backend/extendedVigenere");
 let string = require('../../backend/util/string')
@@ -15,12 +15,13 @@ const truncate = (input) => {
 // http://stackoverflow.com/questions/962802#962890
 function shuffle(array, seed) {
   var tmp, l = array.length;
+  var myrng = new seedrandom(seed);
   let seedNum;
-  for (var i=0; i<seed.length; i++) {
-    seedNum = seed.charCodeAt(i);
+  for (var i=0; i<array.length; i++) {
+    seedNum = Math.abs(myrng.int32());
     tmp = array[seedNum % l];
-    array[seedNum % l] = array[i % l];
-    array[i % l] = tmp;
+    array[seedNum % l] = array[i];
+    array[i] = tmp;
   }
   return array;
 }
@@ -33,18 +34,24 @@ let fileReader;
 class Sound extends Component {
   state = {
     key: "",
+    steganoName: "",
     selectedFile: undefined,
     steganoSrc: "",
     soundSrc: "",
     fileType: "",
     fileName: "",
     text: "",
+    off: 0,
     dataSize: 0,
     randomize: false
   }
 
   onKeyChange = (e) => {
     this.setState({ key: e.target.value })
+  }
+
+  onNameChange = (e) => {
+    this.setState({ steganoName: e.target.value })
   }
 
   onTextChange = event => {
@@ -76,7 +83,7 @@ class Sound extends Component {
     // console.log(this.state.fileType)
     // console.log(content)
     const typedArray = new Uint8Array(fileReader.result);
-    console.log(typedArray)
+    // console.log(typedArray)
 
     fileData = [...typedArray];
     // console.log(fileData);
@@ -104,6 +111,7 @@ class Sound extends Component {
       // Setup variables
       let array = string.toASCII(this.state.text);
       let endbyte = 0;
+      let offset = this.state.off;
       
       // Randomize array
       if (this.state.randomize) { 
@@ -116,20 +124,20 @@ class Sound extends Component {
       
       // Push "end of text" byte
       array.push(endbyte);
-      console.log(array);
-
+      
       // Put each bit into audio
       for (var i = 0; i < array.length; i++) {
         let bits = array[i].toString(2);
         bits = "00000000".substr(bits.length) + bits;
         for (var j = 0; j < 8; j++) {
-          fileData[44+(i*8)+j] &= 254;
-          fileData[44+(i*8)+j] += parseInt(bits.charAt(j));
+          fileData[offset+(i*8)+j] &= 254;
+          fileData[offset+(i*8)+j] += parseInt(bits.charAt(j));
         }
       }
-
+      
       // Download audio
       const typedArray = new Uint8Array(fileData);
+      // console.log(typedArray);
       this.downloadExtended(typedArray);
     } else {
       alert("Text is empty or no sound file!");
@@ -150,20 +158,25 @@ class Sound extends Component {
     let url = URL.createObjectURL(file);
     this.setState({ steganoSrc: url })
     element.href = url; 
-    element.download = "Altered-" + this.state.fileName;
+    element.download = this.state.steganoName;
     document.body.appendChild(element);
     element.click();
     element.remove();
   }
 
   readDataSize = async (dataArray) => {
-    let max = 0;
-    for (var i = 43; i >= 40; i--) {
-      max = max * 256;
-      max += dataArray[i];
-      console.log(max)
+    let offset1 = 0, offset2 = 0, offset = 0;
+    for (var i = 19; i >= 16; i--) {
+      offset1 = offset1 * 256;
+      offset1 += dataArray[i];
     }
-    this.setState({ dataSize: max });
+    for (i = 43; i >= 40; i--) {
+      offset2 = offset2 * 256;
+      offset2 += dataArray[i];
+    }
+    offset = offset1 + offset2;
+    this.setState({ off: (offset + 45) });
+    this.setState({ dataSize: (dataArray.length - (offset + 45)) })
 
   }
 
@@ -183,6 +196,9 @@ class Sound extends Component {
 
               <label>Key</label>
               <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+
+              <label>Save As...</label>
+              <input id="key-input" placeholder="something.wav" type="text" name="key" onChange={this.onNameChange} value={this.state.steganoName}/>
 
               <label>Randomize?</label>
               <input type="checkbox" id="rand-input" name="rand-input" checked={this.state.randomize} onChange={this.onRandChange}/>

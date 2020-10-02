@@ -2,8 +2,8 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./SoundDec.css";
+var seedrandom = require('seedrandom');
 // import { text } from "@fortawesome/fontawesome-svg-core";
-// import { randomInt } from "mathjs";
 
 let ExtVigenere = require("../../backend/extendedVigenere");
 
@@ -13,13 +13,18 @@ const truncate = (input) => {
 
 // http://stackoverflow.com/questions/962802#962890
 function deshuffle(array, seed) {
-  var tmp, l = array.length;
-  let seedNum;
-  for (var i=seed.length-1; i>=0; i--) {
-    seedNum = seed.charCodeAt(i);
-    tmp = array[seedNum % l];
-    array[seedNum % l] = array[i % l];
-    array[i % l] = tmp;
+  var num, tmp, l = array.length;
+  var myrng = new seedrandom(seed);
+  let seedNum = [];
+  for (var i=0; i<array.length; i++) {
+    seedNum.push(Math.abs(myrng.int32()));
+  }
+  console.log(seedNum);
+  for (i=array.length-1; i>=0; i--) {
+    num = seedNum.pop();
+    tmp = array[num % l];
+    array[num % l] = array[i];
+    array[i] = tmp;
   }
   return array;
 }
@@ -38,6 +43,7 @@ class SoundDec extends Component {
     fileType: "",
     fileName: "",
     text: "",
+    off: 0,
     dataSize: 0
   }
 
@@ -77,13 +83,15 @@ class SoundDec extends Component {
   handleDecrypt = async (e) => {
     e.preventDefault();
 
+    var offset = this.state.off
+
     if (fileData !== []) {
       // Gets each last bit from audio
       let array = [];
       for (var i = 0; i < this.state.dataSize; i++) {
         let bits = "";
         for (var j = 0; j < 8; j++) {
-          bits += fileData[44+(i*8)+j] & 1;
+          bits += fileData[offset+(i*8)+j] & 1;
         }
         array.push(parseInt(bits, 2));
       }
@@ -142,13 +150,20 @@ class SoundDec extends Component {
   }
 
   readDataSize = async (dataArray) => {
-    let max = 0;
-    for (var i = 43; i >= 40; i--) {
-      max = max * 256;
-      max += dataArray[i];
-      console.log(max)
+    let offset1 = 0, offset2 = 0, offset = 0;
+    for (var i = 19; i >= 16; i--) {
+      console.log(offset1);
+      offset1 = offset1 * 256;
+      offset1 += dataArray[i];
     }
-    this.setState({ dataSize: max });
+    for (i = 43; i >= 40; i--) {
+      offset2 = offset2 * 256;
+      offset2 += dataArray[i];
+    }
+    offset = offset1 + offset2;
+    console.log(offset);
+    this.setState({ off: (offset + 45) });
+    this.setState({ dataSize: (dataArray.length - (offset + 45)) })
 
   }
 
