@@ -57,7 +57,7 @@ function App() {
         <GlobalStyles />
         <Switch theme={theme} toggleTheme={toggleTheme} />
         <div>
-          <BrowserRouter basename="/Crypto-Helper">
+          <BrowserRouter basename="/Stegano-Helper">
             <Router />
           </BrowserRouter>
         </div>

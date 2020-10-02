@@ -6,9 +6,23 @@ import "./Sound.css";
 // import { randomInt } from "mathjs";
 
 let ExtVigenere = require("../../backend/extendedVigenere");
+let string = require('../../backend/util/string')
 
 const truncate = (input) => {
   return (input.length > 10) ? input.substr(0, 9) + '...' : input;
+}
+
+// http://stackoverflow.com/questions/962802#962890
+function shuffle(array, seed) {
+  var tmp, l = array.length;
+  let seedNum;
+  for (var i=0; i<seed.length; i++) {
+    seedNum = seed.charCodeAt(i);
+    tmp = array[seedNum % l];
+    array[seedNum % l] = array[i % l];
+    array[i % l] = tmp;
+  }
+  return array;
 }
 
 let fileData = [];
@@ -18,17 +32,27 @@ let fileReader;
 
 class Sound extends Component {
   state = {
+    key: "",
     selectedFile: undefined,
     steganoSrc: "",
     soundSrc: "",
     fileType: "",
     fileName: "",
     text: "",
-    dataSize: 0
+    dataSize: 0,
+    randomize: false
+  }
+
+  onKeyChange = (e) => {
+    this.setState({ key: e.target.value })
   }
 
   onTextChange = event => {
     this.setState({ text: event.target.value });
+  }
+
+  onRandChange = (e) => {
+    this.setState({ randomize: !this.state.randomize })
   }
 
   // On file select (from the pop up)
@@ -68,13 +92,33 @@ class Sound extends Component {
   handleEncrypt = async (e) => {
     e.preventDefault();
 
+    // If message is too long, do nothing
+    if (this.state.text.length > ((this.state.dataSize/8)-1)) {
+      alert("Message too long!");
+      return;
+    }
+
+    // Start steganography
     if (this.state.text !== "" && fileData !== []) {
-      let array = [];
-      array = ExtVigenere.encrypt(this.state.text + "\0", "test");
-      // for (var i = 0; i < this.state.text.length; i++) {
-      //   array.push(this.state.text.charCodeAt(i));
-      // }
+
+      // Setup variables
+      let array = string.toASCII(this.state.text);
+      let endbyte = 0;
+      
+      // Randomize array
+      if (this.state.randomize) { 
+        endbyte = 1;
+        array = shuffle(array, this.state.key);
+      }
+
+      // Encrypts text into array of ASCII
+      array = ExtVigenere.encrypt(array, this.state.key);
+      
+      // Push "end of text" byte
+      array.push(endbyte);
       console.log(array);
+
+      // Put each bit into audio
       for (var i = 0; i < array.length; i++) {
         let bits = array[i].toString(2);
         bits = "00000000".substr(bits.length) + bits;
@@ -84,17 +128,8 @@ class Sound extends Component {
         }
       }
 
-      // // Add extra 0
-      // let bits = "";
-      // bits = "00000000".substr(bits.length) + bits;
-      // for (var j = 0; j < 8; j++) {
-      //   fileData[44+(i*8)+j] &= 254;
-      //   fileData[44+(i*8)+j] += parseInt(bits.charAt(j));
-      // }
-
+      // Download audio
       const typedArray = new Uint8Array(fileData);
-      console.log(typedArray);
-
       this.downloadExtended(typedArray);
     } else {
       alert("Text is empty or no sound file!");
@@ -145,6 +180,12 @@ class Sound extends Component {
               <label>Text</label>
               <textarea id="text-input" placeholder={"Max character: " + ((this.state.dataSize/8) - 1)} disabled={this.state.dataSize === 0}
                 type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
+
+              <label>Key</label>
+              <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+
+              <label>Randomize?</label>
+              <input type="checkbox" id="rand-input" name="rand-input" checked={this.state.randomize} onChange={this.onRandChange}/>
 
               <div className="button-container">
                 <input id="file-input" type="file" accept="audio/wav" name="file" className="upload-button" onChange={this.onFileChange} />

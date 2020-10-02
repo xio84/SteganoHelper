@@ -11,6 +11,19 @@ const truncate = (input) => {
   return (input.length > 10) ? input.substr(0, 9) + '...' : input;
 }
 
+// http://stackoverflow.com/questions/962802#962890
+function deshuffle(array, seed) {
+  var tmp, l = array.length;
+  let seedNum;
+  for (var i=seed.length-1; i>=0; i--) {
+    seedNum = seed.charCodeAt(i);
+    tmp = array[seedNum % l];
+    array[seedNum % l] = array[i % l];
+    array[i % l] = tmp;
+  }
+  return array;
+}
+
 let fileData = [];
 
 let URLReader;
@@ -18,6 +31,7 @@ let fileReader;
 
 class SoundDec extends Component {
   state = {
+    key: "",
     selectedFile: undefined,
     steganoSrc: "",
     soundSrc: "",
@@ -25,6 +39,10 @@ class SoundDec extends Component {
     fileName: "",
     text: "",
     dataSize: 0
+  }
+
+  onKeyChange = (e) => {
+    this.setState({ key: e.target.value })
   }
 
   onTextChange = event => {
@@ -49,24 +67,18 @@ class SoundDec extends Component {
   }
 
   handleFileRead = async (e) => {
-    // console.log(this.state.fileType)
-    // console.log(content)
     const typedArray = new Uint8Array(fileReader.result);
-    console.log(typedArray)
 
     fileData = [...typedArray];
-    // console.log(fileData);
     
     this.readDataSize(fileData);
-    
-    // const encryptedBuffer = new Uint8Array(encrypted);
-    
-    // this.downloadExtended(encryptedBuffer);
-    // this.setState({ soundSrc: content })
   }
 
   handleDecrypt = async (e) => {
+    e.preventDefault();
+
     if (fileData !== []) {
+      // Gets each last bit from audio
       let array = [];
       for (var i = 0; i < this.state.dataSize; i++) {
         let bits = "";
@@ -75,16 +87,35 @@ class SoundDec extends Component {
         }
         array.push(parseInt(bits, 2));
       }
+
+      // Extract only the text part
+      i = 0;
+      var tmp = [];
+      while (i < array.length && array[i] > 1) {
+        tmp.push(array[i]);
+        i++;
+      }
+      var randomize = array[i];
+      console.log(randomize);
+      array = tmp;
       console.log(array);
-      array = ExtVigenere.decrypt(array, "test");
-      let text = "";
+
+      // Decrypts it
+      array = ExtVigenere.decrypt(array, this.state.key);
+      let res = "";
+
+      // Derandomizes array
+      if (randomize === 1) {
+        array = deshuffle(array, this.state.key);
+        console.log(array);
+      }
 
       i = 0;
       while (i < array.length && array[i] !== 0) {
-        text += String.fromCharCode(array[i]);
+        res += String.fromCharCode(array[i]);
         i++;
       }
-      alert(text);
+      this.setState({ text: res })
     } else {
       alert("No sound file!");
     }
@@ -132,8 +163,12 @@ class SoundDec extends Component {
           <div className="container-decrypt">
             <form className="decrypt-form" onSubmit={this.handleDecrypt}>
               <label>Text</label>
-                <textarea id="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0}
-                  type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
+              <textarea id="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0} readOnly
+                  type="text" name="text" rows="6" value={this.state.text}/>
+
+              <label>Key</label>
+              <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+
               <div className="button-container">
                 <input id="file-input" type="file" accept="audio/wav" name="file" className="upload-button" onChange={this.onFileChange} />
                 <label htmlFor="file-input">
