@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "./Sound.css";
+import "./SoundDec.css";
 // import { text } from "@fortawesome/fontawesome-svg-core";
 // import { randomInt } from "mathjs";
 
@@ -16,7 +16,7 @@ let fileData = [];
 let URLReader;
 let fileReader;
 
-class Sound extends Component {
+class SoundDec extends Component {
   state = {
     selectedFile: undefined,
     steganoSrc: "",
@@ -65,39 +65,28 @@ class Sound extends Component {
     // this.setState({ soundSrc: content })
   }
 
-  handleEncrypt = async (e) => {
-    e.preventDefault();
-
-    if (this.state.text !== "" && fileData !== []) {
+  handleDecrypt = async (e) => {
+    if (fileData !== []) {
       let array = [];
-      array = ExtVigenere.encrypt(this.state.text + "\0", "test");
-      // for (var i = 0; i < this.state.text.length; i++) {
-      //   array.push(this.state.text.charCodeAt(i));
-      // }
-      console.log(array);
-      for (var i = 0; i < array.length; i++) {
-        let bits = array[i].toString(2);
-        bits = "00000000".substr(bits.length) + bits;
+      for (var i = 0; i < this.state.dataSize; i++) {
+        let bits = "";
         for (var j = 0; j < 8; j++) {
-          fileData[44+(i*8)+j] &= 254;
-          fileData[44+(i*8)+j] += parseInt(bits.charAt(j));
+          bits += fileData[44+(i*8)+j] & 1;
         }
+        array.push(parseInt(bits, 2));
       }
+      console.log(array);
+      array = ExtVigenere.decrypt(array, "test");
+      let text = "";
 
-      // // Add extra 0
-      // let bits = "";
-      // bits = "00000000".substr(bits.length) + bits;
-      // for (var j = 0; j < 8; j++) {
-      //   fileData[44+(i*8)+j] &= 254;
-      //   fileData[44+(i*8)+j] += parseInt(bits.charAt(j));
-      // }
-
-      const typedArray = new Uint8Array(fileData);
-      console.log(typedArray);
-
-      this.downloadExtended(typedArray);
+      i = 0;
+      while (i < array.length && array[i] !== 0) {
+        text += String.fromCharCode(array[i]);
+        i++;
+      }
+      alert(text);
     } else {
-      alert("Text is empty or no sound file!");
+      alert("No sound file!");
     }
   }
   
@@ -139,24 +128,21 @@ class Sound extends Component {
   render() {
     return (
       <React.Fragment>
-        <div className="wrapper-encrypt">
-          <div className="container-encrypt">
-            <form className="encrypt-form" onSubmit={this.handleEncrypt}>
+        <div className="wrapper-decrypt">
+          <div className="container-decrypt">
+            <form className="decrypt-form" onSubmit={this.handleDecrypt}>
               <label>Text</label>
-              <textarea id="text-input" placeholder={"Max character: " + ((this.state.dataSize/8) - 1)} disabled={this.state.dataSize === 0}
-                type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
-
+                <textarea id="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0}
+                  type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
               <div className="button-container">
                 <input id="file-input" type="file" accept="audio/wav" name="file" className="upload-button" onChange={this.onFileChange} />
                 <label htmlFor="file-input">
                   <FontAwesomeIcon icon={this.state.fileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.fileName === "" ? "Upload" : truncate(this.state.fileName)}
                 </label>
                 <audio id="src-sound" src={this.state.soundSrc} controls={this.state.soundSrc!==""}></audio>
-                <button className="encrypt-button" type="submit">
-                  <FontAwesomeIcon icon="lock" /> &nbsp; Encrypt
+                <button className="decrypt-button" type="submit">
+                  <FontAwesomeIcon icon="lock-open" /> &nbsp; Decrypt
                 </button>
-                <audio id="stegano-sound" src={this.state.steganoSrc} controls={this.state.steganoSrc!==""}></audio>
-
               </div>
             </form>
           </div>
@@ -166,4 +152,4 @@ class Sound extends Component {
   }
 }
 
-export default Sound;
+export default SoundDec;

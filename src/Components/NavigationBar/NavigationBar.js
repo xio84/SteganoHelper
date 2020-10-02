@@ -15,7 +15,13 @@ class NavigationBar extends Component {
 
           <Link className="navbar-a" to="/sound">
             <div className="navbar-button">
-              <font color="white">Audio</font>
+              <font color="white">Audio Encryption</font>
+            </div>
+          </Link>
+
+          <Link className="navbar-a" to="/sound-dec">
+            <div className="navbar-button">
+              <font color="white">Audio Decryption</font>
             </div>
           </Link>
         </div>
