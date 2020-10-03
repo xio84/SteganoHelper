@@ -179,6 +179,8 @@ class SoundDec extends Component {
         this.setState({injectedFileName : name});
         console.log(name);
         // this.downloadExtended(typedArray, name);
+
+        document.getElementById("modal-result").style.display = "block";
       }
     } else {
       alert("No sound file!");
@@ -249,12 +251,28 @@ class SoundDec extends Component {
               </div>
             </form>
             <form hidden={this.state.injectedFileName === ""} onSubmit={this.downloadExtended}>
-                <label>Save extracted file as...</label>
-                <input id="iFN-input" placeholder="Name of injected file" type="text" name="injectedFN" onChange={this.onInjectedFileNameChange} value={this.state.injectedFileName}/>
-                <button className="decrypt-button" type="submit">
+                
+            </form>
+          </div>
+        </div>
+        <div id="modal-result" className="modal-decrypt">
+          <div className="modal-content-container">
+            <div className="modal-content">
+              <p id="message"><span id="methodResult"></span> Result</p>
+
+              <label>Save extracted file as...</label>
+              <input id="iFN-input" placeholder="Name of injected file" type="text" name="injectedFN" onChange={this.onInjectedFileNameChange} value={this.state.injectedFileName}/>
+
+              <div className="button-container">
+                <button className="download-button" onClick={this.downloadExtended}>
                   <FontAwesomeIcon icon="download" /> &nbsp; Download
                 </button>
-            </form>
+
+                <button className="close-button" onClick={this.closeModal}>
+                  <FontAwesomeIcon icon="times-circle" /> &nbsp; Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </React.Fragment>
