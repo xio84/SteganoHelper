@@ -119,18 +119,25 @@ class Video extends Component {
       
       // Push "end of text" byte
       array.push(endbyte);
-      console.log(array);
+      // console.log(array);
 
+      var movi = 0;
+      for (var i=0;i<fileData.length;i++) {
+        if (fileData[i] == 109 && fileData[i+1] == 111 && fileData[i+2] == 118 && fileData[i+3] == 105) {
+          movi = i;
+        }
+      }
+      console.log(movi);
       // Put each bit into audio
-    //   for (var i = 0; i < array.length; i++) {
-    //     let bits = array[i].toString(2);
-    //     bits = "00000000".substr(bits.length) + bits;
-    //     for (var j = 0; j < 8; j++) {
-    //       fileData[44+(i*8)+j] &= 254;
-    //       fileData[44+(i*8)+j] += parseInt(bits.charAt(j));
-    //     }
-    //   }
-
+      for (i = 0; i < array.length; i++) {
+        let bits = array[i].toString(2);
+        bits = "00000000".substr(bits.length) + bits;
+        for (var j = 0; j < 8; j++) {
+          fileData[movi+4+(i*8)+j] &= 254;
+          fileData[movi+4+(i*8)+j] += parseInt(bits.charAt(j));
+        }
+      }
+      console.log(fileData);
       // Download audio
       const typedArray = new Uint8Array(fileData);
       this.downloadExtended(typedArray);
@@ -167,7 +174,7 @@ class Video extends Component {
       temp += max.toString(16);
     }
     max = (parseInt(temp, 16) + 8);
-    console.log(max);
+    // console.log(max);
     this.setState({ dataSize: max });
 
   }
