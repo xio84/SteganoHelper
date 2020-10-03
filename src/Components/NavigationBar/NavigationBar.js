@@ -24,6 +24,12 @@ class NavigationBar extends Component {
               <font color="white">Audio Decryption</font>
             </div>
           </Link>
+
+          <Link className="navbar-a" to="/video">
+            <div className="navbar-button">
+              <font color="white">Video Encryption</font>
+            </div>
+          </Link>
         </div>
       </div>
     );
