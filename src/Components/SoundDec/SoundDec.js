@@ -58,6 +58,10 @@ class SoundDec extends Component {
     this.setState({ text: event.target.value });
   }
 
+  onInjectedFileNameChange = event => {
+    this.setState({ injectedFileName: event.target.value });
+  }
+
   // On file select (from the pop up)
   onFileChange = event => {
     if (event.target.files[0] !== undefined) {
@@ -171,10 +175,10 @@ class SoundDec extends Component {
 
         // Download file
         targetData = array;
-        const typedArray = new Uint8Array(targetData);
+        // const typedArray = new Uint8Array(targetData);
         this.setState({injectedFileName : name});
         console.log(name);
-        this.downloadExtended(typedArray, name);
+        // this.downloadExtended(typedArray, name);
       }
     } else {
       alert("No sound file!");
@@ -185,16 +189,17 @@ class SoundDec extends Component {
     this.setState({ soundSrc: fileReader.result })
   }
 
-  downloadExtended = async (content, name) => {
+  downloadExtended = async (e) => {
+    const typedArray = new Uint8Array(targetData);
     const element = document.createElement("a");
-    const file = new Blob([content], {
+    const file = new Blob([typedArray], {
     });
 
     element.className = "download-file";
     let url = URL.createObjectURL(file);
     this.setState({ steganoSrc: url })
     element.href = url; 
-    element.download = "Extracted-" + name;
+    element.download = this.state.injectedFileName;
     document.body.appendChild(element);
     element.click();
     element.remove();
@@ -242,6 +247,13 @@ class SoundDec extends Component {
                   <FontAwesomeIcon icon="lock-open" /> &nbsp; Decrypt
                 </button>
               </div>
+            </form>
+            <form hidden={this.state.injectedFileName === ""} onSubmit={this.downloadExtended}>
+                <label>Save extracted file as...</label>
+                <input id="iFN-input" placeholder="Name of injected file" type="text" name="injectedFN" onChange={this.onInjectedFileNameChange} value={this.state.injectedFileName}/>
+                <button className="decrypt-button" type="submit">
+                  <FontAwesomeIcon icon="download" /> &nbsp; Download
+                </button>
             </form>
           </div>
         </div>
