@@ -95,27 +95,32 @@ class SoundDec extends Component {
         }
         array.push(parseInt(bits, 2));
       }
-
+      
       // Extract only the text part
       i = 0;
-      var tmp = [];
-      while (i < array.length && array[i] > 1) {
-        tmp.push(array[i]);
-        i++;
-      }
-      var randomize = array[i];
-      console.log(randomize);
-      array = tmp;
-      console.log(array);
-
-      // Decrypts it
-      array = ExtVigenere.decrypt(array, this.state.key);
+      var type = array[i]; i++;
       let res = "";
-
-      // Derandomizes array
-      if (randomize === 1) {
-        array = deshuffle(array, this.state.key);
+      if (type === 0) {
+        var tmp = [];
+        while (i < array.length && array[i] > 1) {
+          tmp.push(array[i]);
+          i++;
+        }
+        var randomize = array[i];
+        console.log(randomize);
+        array = tmp;
         console.log(array);
+
+        // Decrypts it
+        array = ExtVigenere.decrypt(array, this.state.key);
+
+        // Derandomizes array
+        if (randomize === 1) {
+          array = deshuffle(array, this.state.key);
+          console.log(array);
+        }
+      } else {
+        alert("first byte === 1")
       }
 
       i = 0;
@@ -150,21 +155,18 @@ class SoundDec extends Component {
   }
 
   readDataSize = async (dataArray) => {
-    let offset1 = 0, offset2 = 0, offset = 0;
-    for (var i = 19; i >= 16; i--) {
-      console.log(offset1);
-      offset1 = offset1 * 256;
-      offset1 += dataArray[i];
+    let offset = 0;
+    var i = 0, found = false;
+    while (i < dataArray.length && !found) {
+      if (dataArray[i] === 100 && dataArray[i+1] === 97 && dataArray[i+2] === 116 && dataArray[i+3] === 97) {
+        found = true;
+      };
+      i++;
     }
-    for (i = 43; i >= 40; i--) {
-      offset2 = offset2 * 256;
-      offset2 += dataArray[i];
-    }
-    offset = offset1 + offset2;
+    offset = i+8;
     console.log(offset);
-    this.setState({ off: (offset + 45) });
-    this.setState({ dataSize: (dataArray.length - (offset + 45)) })
-
+    this.setState({ off: (offset) });
+    this.setState({ dataSize: (dataArray.length - (offset)) });
   }
 
   closeModal() {

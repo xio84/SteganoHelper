@@ -27,6 +27,7 @@ function shuffle(array, seed) {
 }
 
 let fileData = [];
+let targetData = [];
 
 let URLReader;
 let fileReader;
@@ -40,6 +41,8 @@ class Sound extends Component {
     soundSrc: "",
     fileType: "",
     fileName: "",
+    injectedFile: undefined,
+    injectedFileName: "",
     text: "",
     off: 0,
     dataSize: 0,
@@ -60,6 +63,14 @@ class Sound extends Component {
 
   onRandChange = (e) => {
     this.setState({ randomize: !this.state.randomize })
+  }
+
+  // On target select (from the pop up)
+  onTargetChange = event => {
+    if (event.target.files[0] !== undefined) {
+      this.setState({ injectedFile: event.target.files[0] });
+      this.setState({ injectedFileName: event.target.files[0].name });
+    }
   }
 
   // On file select (from the pop up)
@@ -96,21 +107,30 @@ class Sound extends Component {
     // this.setState({ soundSrc: content })
   }
 
+  handleTargetRead = async (e) => {
+    const typedArray = new Uint8Array(fileReader.result);
+    targetData = [...typedArray];
+  }
+
   handleEncrypt = async (e) => {
     e.preventDefault();
-
-    // If message is too long, do nothing
-    if (this.state.text.length > ((this.state.dataSize/8)-1)) {
-      alert("Message too long!");
-      return;
+    
+    // Start file steganography
+    if (this.state.injectedFile !== undefined && this.state.selectedFile !== undefined) {
+      alert(targetData)
     }
-
-    // Start steganography
-    if (this.state.text !== "" && fileData !== []) {
+    // Start textsteganography
+    else if (this.state.text !== "" && this.state.selectedFile !== undefined) {
+      // If message is too long, do nothing
+      if (this.state.text.length > Math.floor(((this.state.dataSize/8)-1))) {
+        alert("Message too long!");
+        return;
+      }
 
       // Setup variables
       let array = string.toASCII(this.state.text);
       let endbyte = 0;
+      let startbyte = 0;
       let offset = this.state.off;
       
       // Randomize array
@@ -122,8 +142,11 @@ class Sound extends Component {
       // Encrypts text into array of ASCII
       array = ExtVigenere.encrypt(array, this.state.key);
       
-      // Push "end of text" byte
+      // Push extra bytes
       array.push(endbyte);
+      array = [startbyte].concat(array);
+
+      console.log(fileData);
       
       // Put each bit into audio
       for (var i = 0; i < array.length; i++) {
@@ -165,18 +188,18 @@ class Sound extends Component {
   }
 
   readDataSize = async (dataArray) => {
-    let offset1 = 0, offset2 = 0, offset = 0;
-    for (var i = 19; i >= 16; i--) {
-      offset1 = offset1 * 256;
-      offset1 += dataArray[i];
+    let offset = 0;
+    var i = 0, found = false;
+    while (i < dataArray.length && !found) {
+      if (dataArray[i] === 100 && dataArray[i+1] === 97 && dataArray[i+2] === 116 && dataArray[i+3] === 97) {
+        found = true;
+      };
+      i++;
     }
-    for (i = 43; i >= 40; i--) {
-      offset2 = offset2 * 256;
-      offset2 += dataArray[i];
-    }
-    offset = offset1 + offset2;
-    this.setState({ off: (offset + 45) });
-    this.setState({ dataSize: (dataArray.length - (offset + 45)) })
+    offset = i+8;
+    console.log(offset);
+    this.setState({ off: (offset) });
+    this.setState({ dataSize: (dataArray.length - (offset)) });
 
   }
 
@@ -191,7 +214,7 @@ class Sound extends Component {
           <div className="container-encrypt">
             <form className="encrypt-form" onSubmit={this.handleEncrypt}>
               <label>Text</label>
-              <textarea id="text-input" placeholder={"Max character: " + ((this.state.dataSize/8) - 1)} disabled={this.state.dataSize === 0}
+              <textarea id="text-input" placeholder={"Max character: " + (Math.floor((this.state.dataSize/8) - 2))} disabled={this.state.dataSize === 0}
                 type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
 
               <label>Key</label>

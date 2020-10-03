@@ -17,6 +17,8 @@ module.exports = {
 
         if (typeof key == "string") K = string.toASCII(key);
 
+        if (K === []) return P;
+
         for (var i = 0; i < P.length; i++) {
             P[i] = string.mod((P[i] + K[string.mod(i, K.length)]), 256);
         }
