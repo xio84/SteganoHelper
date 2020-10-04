@@ -64,7 +64,7 @@ class Video extends Component {
       if (event.target.files[0] !== undefined) {
         const src = URL.createObjectURL(event.target.files[0]);
         this.setState({videoSrc: src});
-        console.log(this.state.selectedFile);
+        // console.log(this.state.selectedFile);
         fileReader = new FileReader();
         fileReader.onloadend = this.handleFileRead;
         fileReader.readAsArrayBuffer(event.target.files[0]);
@@ -79,10 +79,10 @@ class Video extends Component {
     // console.log(this.state.fileType)
     // console.log(content)
     const typedArray = new Uint8Array(fileReader.result);
-    console.log(typedArray)
+    // console.log(typedArray)
 
     fileData = [...typedArray];
-    console.log(fileData);
+    // console.log(fileData);
     
     this.readDataSize(fileData);
     
@@ -119,6 +119,7 @@ class Video extends Component {
       
       // Push "end of text" byte
       array.push(endbyte);
+      console.log("array: " + array);
       // console.log(array);
 
       var movi = 0;
@@ -131,13 +132,18 @@ class Video extends Component {
       // Put each bit into audio
       for (i = 0; i < array.length; i++) {
         let bits = array[i].toString(2);
+        // console.log("bit before " + bits)
         bits = "00000000".substr(bits.length) + bits;
+        // console.log("bit after " + bits)
         for (var j = 0; j < 8; j++) {
+          // console.log("filedata before" + fileData[movi+4+(i*8)+j]);
           fileData[movi+4+(i*8)+j] &= 254;
+          // console.log("filedata after 1: " + fileData[movi+4+(i*8)+j]);
           fileData[movi+4+(i*8)+j] += parseInt(bits.charAt(j));
+          // console.log("filedata after 2: " + fileData[movi+4+(i*8)+j]);
         }
       }
-      console.log(fileData);
+      // console.log(fileData);
       // Download audio
       const typedArray = new Uint8Array(fileData);
       this.downloadExtended(typedArray);
@@ -173,7 +179,7 @@ class Video extends Component {
       max = parseInt(dataArray[i]);
       temp += max.toString(16);
     }
-    max = (parseInt(temp, 16) + 8);
+    max = (parseInt(temp, 16) + 8)/8;
     // console.log(max);
     this.setState({ dataSize: max });
 
