@@ -135,7 +135,7 @@ class SoundDec extends Component {
         this.setState({ text: res })
       } 
       // Extracts file
-      else {
+      else if (type === 1) {
         console.log("first byte === 1");
         console.log(array);
         var nLen = 0, fLen = 0;
@@ -178,6 +178,8 @@ class SoundDec extends Component {
         // this.downloadExtended(typedArray, name);
 
         document.getElementById("modal-result").style.display = "block";
+      } else {
+        alert("Not a stego-file!");
       }
     } else {
       alert("No sound file!");

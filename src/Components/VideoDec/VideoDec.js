@@ -2,7 +2,7 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./VideoDec.css";
-var seedrandom = require('seedrandom');
+// var seedrandom = require('seedrandom');
 // import { text } from "@fortawesome/fontawesome-svg-core";
 
 let ExtVigenere = require("../../backend/extendedVigenere");
