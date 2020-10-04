@@ -4,6 +4,7 @@ import BottomBar from "../BottomBar/BottomBar";
 import NavigationBar from "../NavigationBar/NavigationBar";
 import Title from "../Title/Title";
 import Sound from "../Sound/Sound";
+import Picture from "../Picture/Picture"
 
 function Router() {
 	return (
@@ -16,6 +17,7 @@ function Router() {
         {/* <Route exact path="/decrypt" component={Decrypt} /> */}
         {/* <Route exact path="/enigma" component={Enigma} /> */}
         <Route exact path="/sound" component={Sound} />
+        <Route exact path="/picture" component={Picture} />
         {/* <Route exact path="/*" component={Title} /> */}
       </Switch>
       <BottomBar></BottomBar>
