@@ -32,7 +32,6 @@ function deshuffle(array, seed) {
 let fileData = [];
 let targetData = [];
 
-let URLReader;
 let fileReader;
 
 class SoundDec extends Component {
@@ -72,9 +71,7 @@ class SoundDec extends Component {
         fileReader = new FileReader();
         fileReader.onloadend = this.handleFileRead;
         fileReader.readAsArrayBuffer(event.target.files[0]);
-        URLReader = new FileReader();
-        URLReader.onloadend = this.handleURLRead;
-        URLReader.readAsDataURL(event.target.files[0]);
+        this.setState({ soundSrc: URL.createObjectURL(event.target.files[0]) });
       }
     }
   }
@@ -185,10 +182,6 @@ class SoundDec extends Component {
     } else {
       alert("No sound file!");
     }
-  }
-  
-  handleURLRead = (e) => {
-    this.setState({ soundSrc: fileReader.result })
   }
 
   downloadExtended = async (e) => {
