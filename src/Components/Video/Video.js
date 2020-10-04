@@ -13,17 +13,17 @@ const truncate = (input) => {
 }
 
 // http://stackoverflow.com/questions/962802#962890
-function shuffle(array, seed) {
-  var tmp, l = array.length;
-  let seedNum;
-  for (var i=0; i<seed.length; i++) {
-    seedNum = seed.charCodeAt(i);
-    tmp = array[seedNum % l];
-    array[seedNum % l] = array[i % l];
-    array[i % l] = tmp;
-  }
-  return array;
-}
+// function shuffle(array, seed) {
+//   var tmp, l = array.length;
+//   let seedNum;
+//   for (var i=0; i<seed.length; i++) {
+//     seedNum = seed.charCodeAt(i);
+//     tmp = array[seedNum % l];
+//     array[seedNum % l] = array[i % l];
+//     array[i % l] = tmp;
+//   }
+//   return array;
+// }
 
 let fileData = [];
 
@@ -124,7 +124,7 @@ class Video extends Component {
 
       var movi = 0;
       for (var i=0;i<fileData.length;i++) {
-        if (fileData[i] == 109 && fileData[i+1] == 111 && fileData[i+2] == 118 && fileData[i+3] == 105) {
+        if (fileData[i] === 109 && fileData[i+1] === 111 && fileData[i+2] === 118 && fileData[i+3] === 105) {
           movi = i;
         }
       }

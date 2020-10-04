@@ -30,6 +30,7 @@ function deshuffle(array, seed) {
 }
 
 let fileData = [];
+let targetData = [];
 
 let URLReader;
 let fileReader;
@@ -43,6 +44,8 @@ class SoundDec extends Component {
     fileType: "",
     fileName: "",
     text: "",
+    injectedFile: undefined,
+    injectedFileName: "",
     off: 0,
     dataSize: 0
   }
@@ -53,6 +56,10 @@ class SoundDec extends Component {
 
   onTextChange = event => {
     this.setState({ text: event.target.value });
+  }
+
+  onInjectedFileNameChange = event => {
+    this.setState({ injectedFileName: event.target.value });
   }
 
   // On file select (from the pop up)
@@ -100,13 +107,16 @@ class SoundDec extends Component {
       i = 0;
       var type = array[i]; i++;
       let res = "";
+      var randomize, tmp = [];
+
+      // Extracts text
       if (type === 0) {
-        var tmp = [];
+        tmp = [];
         while (i < array.length && array[i] > 1) {
           tmp.push(array[i]);
           i++;
         }
-        var randomize = array[i];
+        randomize = array[i];
         console.log(randomize);
         array = tmp;
         console.log(array);
@@ -119,16 +129,59 @@ class SoundDec extends Component {
           array = deshuffle(array, this.state.key);
           console.log(array);
         }
-      } else {
-        alert("first byte === 1")
-      }
 
-      i = 0;
-      while (i < array.length && array[i] !== 0) {
-        res += String.fromCharCode(array[i]);
-        i++;
+        i = 0;
+        while (i < array.length && array[i] !== 0) {
+          res += String.fromCharCode(array[i]);
+          i++;
+        }
+        this.setState({ text: res })
+      } 
+      // Extracts file
+      else {
+        console.log("first byte === 1");
+        console.log(array);
+        var nLen = 0, fLen = 0;
+        var name = "";
+        nLen = array[i] + array[i+1]*256 + array[i+2]*256*256 + array[i+3]*256*256*256;
+        i = i + 4;
+        var dis = i + nLen;
+        while (i < dis) {
+          name += String.fromCharCode(array[i]);
+          i++;
+        }
+        fLen = array[i] + array[i+1]*256 + array[i+2]*256*256 + array[i+3]*256*256*256;
+        i = i + 4;
+        tmp = [];
+        dis = i + fLen;
+        while (i < dis) {
+          tmp.push(array[i]);
+          i++;
+        }
+
+        randomize = array[i];
+        console.log(randomize);
+        array = tmp;
+        console.log(array);
+
+        // Decrypts it
+        array = ExtVigenere.decrypt(array, this.state.key);
+
+        // Derandomizes array
+        if (randomize === 1) {
+          array = deshuffle(array, this.state.key);
+          console.log(array);
+        }
+
+        // Download file
+        targetData = array;
+        // const typedArray = new Uint8Array(targetData);
+        this.setState({injectedFileName : name});
+        console.log(name);
+        // this.downloadExtended(typedArray, name);
+
+        document.getElementById("modal-result").style.display = "block";
       }
-      this.setState({ text: res })
     } else {
       alert("No sound file!");
     }
@@ -138,17 +191,17 @@ class SoundDec extends Component {
     this.setState({ soundSrc: fileReader.result })
   }
 
-  downloadExtended = async (content) => {
+  downloadExtended = async (e) => {
+    const typedArray = new Uint8Array(targetData);
     const element = document.createElement("a");
-    const file = new Blob([content], {
-      type: this.state.fileType,
+    const file = new Blob([typedArray], {
     });
 
     element.className = "download-file";
     let url = URL.createObjectURL(file);
     this.setState({ steganoSrc: url })
     element.href = url; 
-    element.download = "Altered-" + this.state.fileName;
+    element.download = this.state.injectedFileName;
     document.body.appendChild(element);
     element.click();
     element.remove();
@@ -197,6 +250,29 @@ class SoundDec extends Component {
                 </button>
               </div>
             </form>
+            <form hidden={this.state.injectedFileName === ""} onSubmit={this.downloadExtended}>
+                
+            </form>
+          </div>
+        </div>
+        <div id="modal-result" className="modal-decrypt">
+          <div className="modal-content-container">
+            <div className="modal-content">
+              <p id="message"><span id="methodResult"></span> Result</p>
+
+              <label>Save extracted file as...</label>
+              <input id="iFN-input" placeholder="Name of injected file" type="text" name="injectedFN" onChange={this.onInjectedFileNameChange} value={this.state.injectedFileName}/>
+
+              <div className="button-container">
+                <button className="download-button" onClick={this.downloadExtended}>
+                  <FontAwesomeIcon icon="download" /> &nbsp; Download
+                </button>
+
+                <button className="close-button" onClick={this.closeModal}>
+                  <FontAwesomeIcon icon="times-circle" /> &nbsp; Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </React.Fragment>

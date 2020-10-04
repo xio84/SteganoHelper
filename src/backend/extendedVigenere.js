@@ -12,12 +12,12 @@ module.exports = {
         // Convert string to ASCII
         let P = plaintext;
         let K = key;
+        if (K === "" || K === undefined) return P;
 
         if (typeof plaintext == "string") P = string.toASCII(plaintext);
 
         if (typeof key == "string") K = string.toASCII(key);
 
-        if (K === []) return P;
 
         for (var i = 0; i < P.length; i++) {
             P[i] = string.mod((P[i] + K[string.mod(i, K.length)]), 256);
@@ -36,6 +36,7 @@ module.exports = {
         // Convert string to ASCII
         let C = ciphertext;
         let K = key;
+        if (K === "" || K === undefined) return C;
 
         if (typeof ciphertext == "string") C = string.toASCII(ciphertext);
 

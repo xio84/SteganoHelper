@@ -70,6 +70,11 @@ class Sound extends Component {
     if (event.target.files[0] !== undefined) {
       this.setState({ injectedFile: event.target.files[0] });
       this.setState({ injectedFileName: event.target.files[0].name });
+      if (event.target.files[0] !== undefined) {
+        fileReader = new FileReader();
+        fileReader.onloadend = this.handleTargetRead;
+        fileReader.readAsArrayBuffer(event.target.files[0]);
+      }
     }
   }
 
@@ -117,12 +122,74 @@ class Sound extends Component {
     
     // Start file steganography
     if (this.state.injectedFile !== undefined && this.state.selectedFile !== undefined) {
-      alert(targetData)
+      let name = this.state.injectedFileName;
+
+      // If message is too long, do nothing
+      if (name.length + targetData.length > Math.floor(((this.state.dataSize/8)-10))) {
+        alert("File too long!");
+        return;
+      }
+
+      // Setup variables
+      let array = targetData;
+      let endbyte = 0;
+      let startbyte = 1;
+      let offset = this.state.off;
+      
+      // Randomize array
+      if (this.state.randomize) { 
+        endbyte = 1;
+        array = shuffle(array, this.state.key);
+      }
+
+      // Encrypts array
+      array = ExtVigenere.encrypt(array, this.state.key);
+
+      // Adds info about name length, name, and file length
+      var nLen, fLen, nBytes, fBytes, i = 0;
+      nBytes = [0, 0, 0, 0]; nLen = name.length;
+      while (nLen > 0 && i < 4) {
+        console.log("nLen: " + nLen);
+        nBytes[i] += nLen % 256;
+        i++; nLen = Math.floor(nLen / 256);
+      }
+      console.log(nBytes);
+      i = 0;
+      fBytes = [0, 0, 0, 0]; fLen = array.length;
+      while (fLen > 0 && i < 4) {
+        console.log("fLen: " + nLen);
+        fBytes[i] += fLen % 256;
+        i++; fLen = Math.floor(fLen / 256);
+      }
+      console.log(fBytes);
+
+      var ArrName = string.toASCII(name);
+      array = nBytes.concat(ArrName).concat(fBytes).concat(array);
+      console.log(array);
+
+      // Push extra bytes
+      array.push(endbyte);
+      array = [startbyte].concat(array);
+
+      // Put each bit into audio
+      for (i = 0; i < array.length; i++) {
+        let bits = array[i].toString(2);
+        bits = "00000000".substr(bits.length) + bits;
+        for (var j = 0; j < 8; j++) {
+          fileData[offset+(i*8)+j] &= 254;
+          fileData[offset+(i*8)+j] += parseInt(bits.charAt(j));
+        }
+      }
+      
+      // Download audio
+      const typedArray = new Uint8Array(fileData);
+      console.log(typedArray);
+      this.downloadExtended(typedArray);
     }
-    // Start textsteganography
+    // Start text steganography
     else if (this.state.text !== "" && this.state.selectedFile !== undefined) {
       // If message is too long, do nothing
-      if (this.state.text.length > Math.floor(((this.state.dataSize/8)-1))) {
+      if (this.state.text.length > Math.floor(((this.state.dataSize/8)-2))) {
         alert("Message too long!");
         return;
       }
@@ -149,10 +216,10 @@ class Sound extends Component {
       console.log(fileData);
       
       // Put each bit into audio
-      for (var i = 0; i < array.length; i++) {
+      for (i = 0; i < array.length; i++) {
         let bits = array[i].toString(2);
         bits = "00000000".substr(bits.length) + bits;
-        for (var j = 0; j < 8; j++) {
+        for (j = 0; j < 8; j++) {
           fileData[offset+(i*8)+j] &= 254;
           fileData[offset+(i*8)+j] += parseInt(bits.charAt(j));
         }
@@ -216,6 +283,11 @@ class Sound extends Component {
               <label>Text</label>
               <textarea id="text-input" placeholder={"Max character: " + (Math.floor((this.state.dataSize/8) - 2))} disabled={this.state.dataSize === 0}
                 type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
+
+              <input id="target-input" type="file" name="target" className="target-button" onChange={this.onTargetChange} />
+              <label htmlFor="target-input">
+                <FontAwesomeIcon icon={this.state.injectedFileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.injectedFileName === "" ? "Target" : truncate(this.state.injectedFileName)}
+              </label>
 
               <label>Key</label>
               <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
