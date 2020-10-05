@@ -228,11 +228,11 @@ class SoundDec extends Component {
           <div className="container-decrypt">
             <form className="decrypt-form" onSubmit={this.handleDecrypt}>
               <label>Text</label>
-              <textarea id="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0} readOnly
+              <textarea className="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0} readOnly
                   type="text" name="text" rows="6" value={this.state.text}/>
 
               <label>Key</label>
-              <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+              <input className="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
 
               <div className="button-container">
                 <input id="file-input" type="file" accept="audio/wav" name="file" className="upload-button" onChange={this.onFileChange} />

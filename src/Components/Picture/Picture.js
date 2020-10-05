@@ -984,10 +984,10 @@ class Picture extends Component {
               </label>
 
               <label>Key</label>
-              <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+              <input className="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
 
               <label>Save As...</label>
-              <input id="key-input" placeholder="something.wav" type="text" name="key" onChange={this.onNameChange} value={this.state.steganoName}/>
+              <input className="key-input" placeholder="something.wav" type="text" name="key" onChange={this.onNameChange} value={this.state.steganoName}/>
 
               <label>Randomize?</label>
               <input type="checkbox" id="rand-input" name="rand-input" checked={this.state.randomize} onChange={this.onRandChange}/>
