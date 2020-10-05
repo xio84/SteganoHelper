@@ -13,6 +13,8 @@ const truncate = (input) => {
 var seedrandom = require('seedrandom')
 
 let fileData = [];
+// Buffer for file message
+let targetData = [];
 
 let URLReader;
 let fileReader;
@@ -123,18 +125,36 @@ var CanvasToBMP = {
 
 class Picture extends Component {
   state = {
+    key: "",
+    steganoName: "",
     selectedFile: undefined,
     steganoSrc: "",
     pictureSrc: "",
     fileType: "",
     fileName: "",
+    injectedFile: undefined,
+    injectedFileType: "",
     text: "",
     dataSize: 0,
-    extension: ""
+    extension: "",
+    randomize: false,
+    bpcs: false
+  }
+
+  onKeyChange = (e) => {
+    this.setState({ key: e.target.value })
   }
 
   onTextChange = event => {
     this.setState({ text: event.target.value });
+  }
+
+  onNameChange = (e) => {
+    this.setState({ steganoName: e.target.value })
+  }
+
+  onRandChange = (e) => {
+    this.setState({ randomize: !this.state.randomize })
   }
 
   findAmplifiedMinified = (x,max) => {
@@ -189,6 +209,11 @@ class Picture extends Component {
     
     // this.downloadExtended(encryptedBuffer);
     // this.setState({ soundSrc: content })
+  }
+
+  handleTargetRead = async (e) => {
+    const typedArray = new Uint8Array(fileReader.result);
+    targetData = [...typedArray];
   }
 
   constructBitMap = (ctx, width, height) => {
@@ -420,7 +445,122 @@ class Picture extends Component {
     e.preventDefault();
     const {fileType} = this.state
 
-    if (this.state.text !== "" && fileData !== []) {
+    // If message is file
+    if (targetData !== [] && fileData !== []) {
+      let array = targetData;
+      let txt = "";
+      txt += "()"
+      txt += fileType
+      txt += "{}"
+      let ordered = !this.state.randomize
+      let seed = 0
+      for (var i = 0; i < this.state.key.length; i++) {
+        seed += this.state.key.charCodeAt(i);
+      }
+      
+      console.log(txt)
+      for (var i = 0; i < txt.length; i++) {
+        array.push(txt.charCodeAt(i));
+      }
+      console.log(txt)
+      console.log(array);
+      let img = document.getElementById('src-picture')
+      let c = document.createElement('canvas')
+      c.width = img.width
+      c.height = img.height
+      console.log(img.width)
+      console.log(img.height)
+      let ctx = c.getContext("2d")
+      ctx.drawImage(img,0,0)
+      
+      // Stegano BPCS     
+      let bitMap = this.constructBitMap(ctx, c.width, c.height)
+      bitMap = this.analyzeAndHide(bitMap, array, false, 10)
+      this.assembleResult(c, bitMap, c.width, c.height)
+
+
+
+      // Stegano LSB
+      // let x = 0
+      // let y = 0
+      // if (ordered){
+      //   for (let i = 0; i < array.length; i++){
+      //     let bits = array[i].toString(2)
+      //     bits = "00000000".substr(bits.length) + bits;
+      //     for (let j = 0; j < 8; j+=3){
+      //       if (x == img.width){
+      //         y += 1
+      //         x = 0
+      //       }
+      //       let imgData = ctx.getImageData(x,y,1,1)
+      //       imgData.data[0] &= 254
+      //       imgData.data[1] &= 254
+      //       if (bits[j+2] !== undefined){
+      //         imgData.data[2] &= 254
+      //         imgData.data[2] += parseInt(bits.charAt(j+2))
+      //       }
+      //       imgData.data[1] += parseInt(bits.charAt(j+1))
+      //       imgData.data[0] += parseInt(bits.charAt(j))
+      //       ctx.putImageData(imgData, x, y)
+      //       x += 1
+      //     }
+      //   }
+      // } else if (!ordered){
+      //   let listX = []
+      //   let listY = []
+      //   let rng = seedrandom(String.toString(seed))
+      //   for (let i = 0; i < array.length; i++){
+      //     let bits = array[i].toString(2)
+      //     bits = "00000000".substr(bits.length) + bits;
+      //     for (let j = 0; j < 8; j+=3){
+      //       let y = Math.round(rng() * (Math.floor(c.height-1)))
+      //       let x = Math.round(rng() * (Math.floor(c.width-1)))
+      //       listX.push(x)
+      //       listY.push(y)
+      //       if (x in listX && y in listY){
+      //         y = Math.round(rng() * (Math.floor(c.height-1)))
+      //         x = Math.round(rng() * (Math.floor(c.width-1)))
+      //       }
+      //       let imgData = ctx.getImageData(x,y,1,1)
+      //       imgData.data[0] &= 254
+      //       imgData.data[1] &= 254
+      //       if (bits[j+2] !== undefined){
+      //         imgData.data[2] &= 254
+      //         imgData.data[2] += parseInt(bits.charAt(j+2))
+      //       }
+      //       imgData.data[1] += parseInt(bits.charAt(j+1))
+      //       imgData.data[0] += parseInt(bits.charAt(j))
+      //       ctx.putImageData(imgData, x, y)
+      //       x += 1
+      //     }
+      //   }
+      // }
+      // let dest = document.getElementById('stegano-picture')
+      // dest.src = c.toDataURL(fileType)
+
+      let imgOld = document.getElementById('src-picture')
+      let cOld = document.createElement('canvas')
+      let ctxOld = cOld.getContext("2d")
+      ctxOld.drawImage(imgOld,0,0)
+      let sumTotal = 0
+      for (let i = 0; i < img.height; i++){
+        for (let j = 0; j < img.width; j++){
+          let imgData1 = ctxOld.getImageData(j,i,1,1)
+          let imgData2 = ctx.getImageData(j,i,1,1)
+          for (let k = 0; k < 3; k++){
+            sumTotal += Math.pow((imgData1.data[k] - imgData2.data[k]), 2)
+          }
+        }
+      }
+      console.log(sumTotal)
+      sumTotal /= (img.width*img.height*3)
+
+
+      let psnr = 20 * Math.log10(255/Math.sqrt(sumTotal))
+      console.log(psnr)
+    }
+    // If message is text
+    else if (this.state.text !== "" && fileData !== []) {
       let array = [];
       this.state.text += "()"
       this.state.text += fileType
