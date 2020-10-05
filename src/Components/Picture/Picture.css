@@ -129,7 +129,7 @@ button {
     #da406d
   );
   background: linear-gradient(to right, #af497e, #da406d);
-  background-size: 300% 300%;
+  /* background-size: 300% 300%; */
   margin-left: 15px;
 }
 

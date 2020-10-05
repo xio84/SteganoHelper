@@ -2,9 +2,11 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Picture.css";
-import { parse } from "mathjs";
+// import { parse } from "mathjs";
 // import { text } from "@fortawesome/fontawesome-svg-core";
 // import { randomInt } from "mathjs";
+
+let ExtVigenere = require("../../backend/extendedVigenere");
 
 const truncate = (input) => {
   return (input.length > 10) ? input.substr(0, 9) + '...' : input;
@@ -133,6 +135,7 @@ class Picture extends Component {
     fileType: "",
     fileName: "",
     injectedFile: undefined,
+    injectedFileName: "",
     injectedFileType: "",
     text: "",
     dataSize: 0,
@@ -157,6 +160,27 @@ class Picture extends Component {
     this.setState({ randomize: !this.state.randomize })
   }
 
+  onBPCSChange = (e) => {
+    this.setState({ bpcs: !this.state.bpcs })
+  }
+
+  onInjectedFileNameChange = event => {
+    this.setState({ injectedFileName: event.target.value });
+  }
+
+  // On target select (from the pop up)
+  onTargetChange = event => {
+    if (event.target.files[0] !== undefined) {
+      this.setState({ injectedFile: event.target.files[0] });
+      this.setState({ injectedFileName: event.target.files[0].name });
+      if (event.target.files[0] !== undefined) {
+        fileReader = new FileReader();
+        fileReader.onloadend = this.handleTargetRead;
+        fileReader.readAsArrayBuffer(event.target.files[0]);
+      }
+    }
+  }
+
   findAmplifiedMinified = (x,max) => {
     if (x < max/2){
       return x + Math.floor(max/2)
@@ -168,7 +192,7 @@ class Picture extends Component {
   checkerBoardMake = () => {
     let checkerBoard = []
     for (let i = 0; i < 64; i++){
-      if (i % 2 == 0){
+      if (i % 2 === 0){
         checkerBoard.push("0")
       }else{
         checkerBoard.push("1")
@@ -238,7 +262,7 @@ class Picture extends Component {
         bitB = "00000000".substr(bitB.length) + bitB; 
         
         let bitTot = bitR+bitG+bitB
-        if (bitMap[x*24].length == 64){
+        if (bitMap[x*24].length === 64){
           for (let i = 0; i < 24; i++){
             bitMap.push([])
           }
@@ -272,7 +296,7 @@ class Picture extends Component {
 
     let x = 0
     for (let l = 0; l < arrayOfBits.length; l++){
-      if (Mat[x].length == 8){
+      if (Mat[x].length === 8){
         x += 1
       }
       Mat[x].push(arrayOfBits[l])
@@ -282,11 +306,11 @@ class Picture extends Component {
     let sum2 = 0
     for (let k = 0; k < 7; k++){
       for (let l = 0; l < 7; l++){
-        if (Mat[k][l] != Mat[k][l+1]){
+        if (Mat[k][l] !== Mat[k][l+1]){
           sum1 += 1
         }
 
-        if (Mat[l][k] != Mat[l+1][k]){
+        if (Mat[l][k] !== Mat[l+1][k]){
           sum2 += 1
         }
 
@@ -297,7 +321,7 @@ class Picture extends Component {
   } 
 
   analyzeAndHide = (bitMap, message, ordered, seed = null) => {
-    let threshold = 0.3
+    // let threshold = 0.3
     let j = 0
     let s = 0
     let chunk = 0 
@@ -371,11 +395,11 @@ class Picture extends Component {
   assembleResult = (c, bitMap, width, height) => {
     const {fileType} = this.state
     let iters = bitMap.length/24
-    let count = 0
+    // let count = 0
     let x = 0 
     let y = 0
     let ctx = c.getContext("2d")
-    let bmp = this.constructBitMap(ctx, c.width, c.height)
+    // let bmp = this.constructBitMap(ctx, c.width, c.height)
 
     for (let i = 0; i < iters; i++){
       
@@ -430,7 +454,7 @@ class Picture extends Component {
     let ctx3 = c2.getContext("2d")
     ctx3.drawImage(img,0,0)
     console.log(ctx3.getImageData(0,0,c.width,c.height))
-    if (fileType == "image/bmp"){
+    if (fileType === "image/bmp"){
        let bmpBlob = CanvasToBMP.toBlob(c)
        dest.src = URL.createObjectURL(bmpBlob)
     }else{
@@ -448,18 +472,19 @@ class Picture extends Component {
     // If message is file
     if (targetData !== [] && fileData !== []) {
       let array = targetData;
+      array = ExtVigenere.encrypt(array, this.state.key);
       let txt = "";
       txt += "()"
       txt += this.state.injectedFileType
       txt += "{}"
-      let ordered = !this.state.randomize
+      // let ordered = !this.state.randomize
       let seed = 0
-      for (var i = 0; i < this.state.key.length; i++) {
+      for (let i = 0; i < this.state.key.length; i++) {
         seed += this.state.key.charCodeAt(i);
       }
       
       console.log(txt)
-      for (var i = 0; i < txt.length; i++) {
+      for (let i = 0; i < txt.length; i++) {
         array.push(txt.charCodeAt(i));
       }
       console.log(txt)
@@ -487,7 +512,7 @@ class Picture extends Component {
           let bits = array[i].toString(2)
           bits = "00000000".substr(bits.length) + bits;
           for (let j = 0; j < 8; j+=3){
-            if (x == img.width){
+            if (x === img.width){
               y += 1
               x = 0
             }
@@ -565,7 +590,7 @@ class Picture extends Component {
       this.state.text += "()"
       this.state.text += this.state.injectedFileType
       this.state.text += "{}"
-      let ordered = false
+      // let ordered = false
       let seed = 10
       
       console.log(this.state.text)
@@ -600,7 +625,7 @@ class Picture extends Component {
           let bits = array[i].toString(2)
           bits = "00000000".substr(bits.length) + bits;
           for (let j = 0; j < 8; j+=3){
-            if (x == img.width){
+            if (x === img.width){
               y += 1
               x = 0
             }
@@ -680,8 +705,10 @@ class Picture extends Component {
   }
 
   handleDecrypt = async (e) => {
+    e.preventDefault();
+
     if (fileData !== []) {
-      let array = [];
+      // let array = [];
       let img = document.getElementById('src-picture')
       let c = document.createElement('canvas')
       c.width = img.width
@@ -722,7 +749,7 @@ class Picture extends Component {
                   break
                 }
                 temp += bitMap[i][j]
-                if (temp.length == 8){
+                if (temp.length === 8){
                   let res = parseInt(temp,2)
                   result += String.fromCharCode(res)
                   temp = ""
@@ -769,7 +796,7 @@ class Picture extends Component {
                 break
               }
               temp += bitMap[row][j]
-              if (temp.length == 8){
+              if (temp.length === 8){
                 let res = parseInt(temp,2)
                 result += String.fromCharCode(res)
                 temp = ""
@@ -782,6 +809,11 @@ class Picture extends Component {
           }
           console.log(result)
         }
+        targetData = [];
+        for (let i = 0; i < result.length; i++) {
+          targetData.push(result.charCodeAt(i));
+        }
+        targetData = ExtVigenere.decrypt(targetData, this.state.key);
         let ext = ""
         for (let i = result.length-1; i > 0; i--){
           if (result[i] === ")"){
@@ -797,8 +829,9 @@ class Picture extends Component {
         ext = ext.join("")
         console.log(ext)
         this.setState({
-          extension:ext
+          injectedFileType:ext
         })
+        document.getElementById("modal-result").style.display = "block";
       }else{
         //Decrypt LSB
         let im = ctx.getImageData(0,0,c.width,c.height)
@@ -874,15 +907,21 @@ class Picture extends Component {
           }
           ext += text[i]        
         }
+        targetData = [];
+        for (let i = 0; i < text.length; i++) {
+          targetData.push(text.charCodeAt(i));
+        }
+        targetData = ExtVigenere.decrypt(targetData, this.state.key);
         console.log(text)
         ext = ext.split("")
         ext = ext.reverse()
         ext = ext.join("")
         console.log(ext)
         this.setState({
-          extension:ext
+          injectedFileType:ext
         })
-        }    
+        } 
+        document.getElementById("modal-result").style.display = "block";
     } else {
       alert("No paint file!");
     }
@@ -898,16 +937,17 @@ class Picture extends Component {
   }
 
   downloadExtended = async (content) => {
+    const typedArray = new Uint8Array(targetData);
     const element = document.createElement("a");
-    const file = new Blob([content], {
-      type: this.state.fileType,
+    const file = new Blob([typedArray], {
+      type: this.state.injectedFileType,
     });
 
     element.className = "download-file";
     let url = URL.createObjectURL(file);
     this.setState({ steganoSrc: url })
     element.href = url; 
-    element.download = "Altered-" + this.state.fileName;
+    element.download = this.state.injectedFileName;
     document.body.appendChild(element);
     element.click();
     element.remove();
@@ -936,20 +976,37 @@ class Picture extends Component {
             <form className="encrypt-form" onSubmit={this.handleEncrypt}>
               <label>Text</label>
               <textarea id="text-input" placeholder={"Max character: " + (this.state.dataSize/8)} disabled={this.state.dataSize === 0}
-                type="text" name="text" rows="6" onChange={this.onTextChange} value={this.state.text}/>
+                type="text" name="text" rows="4" onChange={this.onTextChange} value={this.state.text}/>
+
+              <input id="target-input" type="file" name="target" className="target-button" onChange={this.onTargetChange} />
+              <label htmlFor="target-input">
+                <FontAwesomeIcon icon={this.state.injectedFileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.injectedFileName === "" ? "Target" : truncate(this.state.injectedFileName)}
+              </label>
+
+              <label>Key</label>
+              <input id="key-input" placeholder="Insert vigenere key here" type="text" name="key" onChange={this.onKeyChange} value={this.state.key}/>
+
+              <label>Save As...</label>
+              <input id="key-input" placeholder="something.wav" type="text" name="key" onChange={this.onNameChange} value={this.state.steganoName}/>
+
+              <label>Randomize?</label>
+              <input type="checkbox" id="rand-input" name="rand-input" checked={this.state.randomize} onChange={this.onRandChange}/>
+
+              <label>BPCS?</label>
+              <input type="checkbox" id="bpcs-input" name="bpcs-input" checked={this.state.bpcs} onChange={this.onBPCSChange}/>
 
               <div className="button-container">
                 <input id="file-input" type="file" accept="image/bmp,image/png" name="file" className="upload-button" onChange={this.onFileChange} />
                 <label htmlFor="file-input">
                   <FontAwesomeIcon icon={this.state.fileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.fileName === "" ? "Upload" : truncate(this.state.fileName)}
                 </label>
-                <img id="src-picture" src={this.state.pictureSrc}></img>
+                <img id="src-picture" alt={this.state.fileName} src={this.state.pictureSrc} width="200px" height="200px"></img>
                 <button className="encrypt-button" type="submit">
                   <FontAwesomeIcon icon="lock" /> &nbsp; Encrypt
                 </button>
-                <img id="stegano-picture" src={this.state.steganoSrc}></img>
+                <img id="stegano-picture" alt={this.state.steganoName} src={this.state.steganoSrc} width="200px" height="200px"></img>
               </div>
-              <button onClick={this.handleDecrypt}>HELP</button>
+              {/* <button onClick={this.handleDecrypt}>HELP</button> */}
             </form>
             <form className="encrypt-form" onSubmit={this.handleDecrypt}>
               <div className="button-container">
@@ -957,7 +1014,7 @@ class Picture extends Component {
                 <label htmlFor="file-input">
                   <FontAwesomeIcon icon={this.state.fileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.fileName === "" ? "Upload" : truncate(this.state.fileName)}
                 </label>
-                <img id="src-picture" src={this.state.pictureSrc}></img>
+                {/* <img id="src-picture" alt={this.state.fileName} src={this.state.pictureSrc} width="200px" height="200px"></img> */}
                 <button className="encrypt-button" type="submit">
                   <FontAwesomeIcon icon="lock" /> &nbsp; Decrypt
                 </button>
@@ -966,19 +1023,19 @@ class Picture extends Component {
             </form>
           </div>
         </div>
-        
-        <div id="modal-result" className="modal-encrypt">
+        <div id="modal-result" className="modal-decrypt">
           <div className="modal-content-container">
             <div className="modal-content">
               <p id="message"><span id="methodResult"></span> Result</p>
 
-              <label className="messageResult">Plaintext</label>
-              <textarea id="plaintextResult" className="encryptedResult" type="text" readOnly rows="6"></textarea>
-
-              <label className="messageResult">Ciphertext</label>
-              <textarea id="encryptedResult" className="encryptedResult" type="text" readOnly rows="6"></textarea>
+              <label>Save extracted file as...</label>
+              <input id="iFN-input" placeholder="Name of injected file" type="text" name="injectedFN" onChange={this.onInjectedFileNameChange} value={this.state.injectedFileName}/>
 
               <div className="button-container">
+                <button className="download-button" onClick={this.downloadExtended}>
+                  <FontAwesomeIcon icon="download" /> &nbsp; Download
+                </button>
+
                 <button className="close-button" onClick={this.closeModal}>
                   <FontAwesomeIcon icon="times-circle" /> &nbsp; Close
                 </button>
