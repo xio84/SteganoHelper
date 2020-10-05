@@ -99,7 +99,7 @@ class Sound extends Component {
     // console.log(typedArray)
 
     fileData = [...typedArray];
-    // console.log(fileData);
+    console.log(fileData);
     
     this.readDataSize(fileData);
     
