@@ -13,17 +13,17 @@ const truncate = (input) => {
 }
 
 // http://stackoverflow.com/questions/962802#962890
-// function shuffle(array, seed) {
-//   var tmp, l = array.length;
-//   let seedNum;
-//   for (var i=0; i<seed.length; i++) {
-//     seedNum = seed.charCodeAt(i);
-//     tmp = array[seedNum % l];
-//     array[seedNum % l] = array[i % l];
-//     array[i % l] = tmp;
-//   }
-//   return array;
-// }
+function shuffle(array, seed) {
+  var tmp, l = array.length;
+  let seedNum;
+  for (var i=0; i<seed.length; i++) {
+    seedNum = seed.charCodeAt(i);
+    tmp = array[seedNum % l];
+    array[seedNum % l] = array[i % l];
+    array[i % l] = tmp;
+  }
+  return array;
+}
 
 let fileData = [];
 
@@ -107,12 +107,9 @@ class Video extends Component {
       // Setup variables
       let array = string.toASCII(this.state.text);
       let endbyte = 0;
-      
-      // Randomize array
-    //   if (this.state.randomize) { 
-    //     endbyte = 1;
-    //     array = shuffle(array, this.state.key);
-    //   }
+      if (this.state.randomize) { 
+        endbyte = 1;
+      }
 
       // Encrypts text into array of ASCII
       array = ExtVigenere.encrypt(array, this.state.key);
@@ -123,32 +120,59 @@ class Video extends Component {
       // console.log(array);
 
       var movi = 0;
+      // var offset = 0;
       for (var i=0;i<fileData.length;i++) {
         if (fileData[i] === 109 && fileData[i+1] === 111 && fileData[i+2] === 118 && fileData[i+3] === 105) {
           movi = i;
+          // if (movi) {
+          //   if (fileData[i] === 0 && fileData[i+1] === 0 && fileData[i+2] === 1) {
+          //     offset = i+3;
+          //     break;
+          //   }
+          // }
         }
       }
       console.log(movi);
-      // Put each bit into audio
+
+      // Randomize array
+      let seqArray = [];
       for (i = 0; i < array.length; i++) {
+        seqArray.push(i);
+      }
+      // console.log(seqArray);
+      if (this.state.randomize) { 
+        seqArray = shuffle(seqArray, this.state.key);
+      }
+      
+      // Put each bit into audio
+      i = 0;
+      // let randbits = "00000000"
+      
+      // for(var j=0; j<8; j++){
+      //   fileData[movi+4+j] &= 254;
+      //   // console.log("filedata after 1: " + fileData[movi+4+(i*8)+j]);
+      //   fileData[movi+4+j] += parseInt(randbits.charAt(j));
+      //   // console.log("filedata after 2: " + fileData[movi+4+(i*8)+j]);
+      // }
+      while(i < seqArray.length) {
+        // console.log("iterasi ke :" +i);
         let bits = array[i].toString(2);
         // console.log("bit before " + bits)
         bits = "00000000".substr(bits.length) + bits;
         // console.log("bit after " + bits)
         for (var j = 0; j < 8; j++) {
           // console.log("filedata before" + fileData[movi+4+(i*8)+j]);
-          fileData[movi+4+(i*8)+j] &= 254;
+          fileData[movi+4+(seqArray[i]*8)+j] &= 254;
           // console.log("filedata after 1: " + fileData[movi+4+(i*8)+j]);
-          fileData[movi+4+(i*8)+j] += parseInt(bits.charAt(j));
+          fileData[movi+4+(seqArray[i]*8)+j] += parseInt(bits.charAt(j));
           // console.log("filedata after 2: " + fileData[movi+4+(i*8)+j]);
         }
+        i++;
       }
       // console.log(fileData);
       // Download audio
       const typedArray = new Uint8Array(fileData);
       this.downloadExtended(typedArray);
-    } else {
-      alert("Text is empty or no sound file!");
     }
   }
   

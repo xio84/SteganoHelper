@@ -139,6 +139,12 @@ class VideoDec extends Component {
     while (i < dataArray.length && !found) {
       if (dataArray[i] === 109 && dataArray[i+1] === 111 && dataArray[i+2] === 118 && dataArray[i+3] === 105) {
         found = true;
+        // if (found1) {
+        //   if (dataArray[i] === 0 && dataArray[i+1] === 0 && dataArray[i+2] === 1) {
+        //     offset = i + 3;
+        //     found2 = true;
+        //   }
+        // }
       };
       i++;
     }
@@ -170,7 +176,7 @@ class VideoDec extends Component {
                 <label htmlFor="file-input">
                   <FontAwesomeIcon icon={this.state.fileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.fileName === "" ? "Upload" : truncate(this.state.fileName)}
                 </label>
-                <audio id="src-sound" src={this.state.soundSrc} controls={this.state.soundSrc!==""}></audio>
+                {/* <audio id="src-sound" src={this.state.soundSrc} controls={this.state.soundSrc!==""}></audio> */}
                 <button className="decrypt-button" type="submit">
                   <FontAwesomeIcon icon="lock-open" /> &nbsp; Decrypt
                 </button>
