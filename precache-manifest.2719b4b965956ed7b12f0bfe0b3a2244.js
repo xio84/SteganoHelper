@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "eb33c1446080baa516890ffccfbd5293",
+    "revision": "32c0a1b400eedcd673b2102852f07a50",
     "url": "/SteganoHelper/index.html"
   },
   {
-    "revision": "43fc606da008d0f31b18",
-    "url": "/SteganoHelper/static/css/main.dde1ac15.chunk.css"
+    "revision": "affaba6a73393cf791da",
+    "url": "/SteganoHelper/static/css/main.6d6c147b.chunk.css"
   },
   {
-    "revision": "67919df1ff614a63432c",
-    "url": "/SteganoHelper/static/js/2.13d42937.chunk.js"
+    "revision": "9d176855609e25b4fe5a",
+    "url": "/SteganoHelper/static/js/2.307d8c25.chunk.js"
   },
   {
     "revision": "c87550333da8df8ab4c80bd1d6e9defb",
-    "url": "/SteganoHelper/static/js/2.13d42937.chunk.js.LICENSE.txt"
+    "url": "/SteganoHelper/static/js/2.307d8c25.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "43fc606da008d0f31b18",
-    "url": "/SteganoHelper/static/js/main.6667c947.chunk.js"
+    "revision": "affaba6a73393cf791da",
+    "url": "/SteganoHelper/static/js/main.c5a08fd2.chunk.js"
   },
   {
     "revision": "7cfb843ff6560103fbb7",
