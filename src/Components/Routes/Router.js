@@ -5,6 +5,9 @@ import NavigationBar from "../NavigationBar/NavigationBar";
 import Title from "../Title/Title";
 import Sound from "../Sound/Sound";
 import Picture from "../Picture/Picture"
+import SoundDec from "../SoundDec/SoundDec";
+import Video from "../Video/Video";
+import VideoDec from "../VideoDec/VideoDec";
 
 function Router() {
 	return (
@@ -18,6 +21,9 @@ function Router() {
         {/* <Route exact path="/enigma" component={Enigma} /> */}
         <Route exact path="/sound" component={Sound} />
         <Route exact path="/picture" component={Picture} />
+        <Route exact path="/sound-dec" component={SoundDec} />
+        <Route exact path="/video" component={Video} />
+        <Route exact path="/video-dec" component={VideoDec} />
         {/* <Route exact path="/*" component={Title} /> */}
       </Switch>
       <BottomBar></BottomBar>

@@ -16,7 +16,7 @@ library.add(faLock, faLockOpen, faUnlock, faFile, faFileUpload, faCloudDownloadA
 function App() {
   const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === "light" ? lightTheme : darkTheme;
-  let lineColor = theme === "light" ? "#6B2DBA" : "#3CA9D1";
+  let lineColor = theme === "light" ? "#7B1DCA" : "#2CB9E1";
 
   if (!componentMounted) {
     return <div/>;
@@ -57,7 +57,7 @@ function App() {
         <GlobalStyles />
         <Switch theme={theme} toggleTheme={toggleTheme} />
         <div>
-          <BrowserRouter basename="/Crypto-Helper">
+          <BrowserRouter basename="/Stegano-Helper">
             <Router />
           </BrowserRouter>
         </div>

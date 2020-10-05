@@ -222,3 +222,7 @@ button {
   height: 0;
   width: 0;
 }
+
+#rand-input {
+  margin-left: 5px;
+}
