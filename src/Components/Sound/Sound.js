@@ -29,7 +29,6 @@ function shuffle(array, seed) {
 let fileData = [];
 let targetData = [];
 
-let URLReader;
 let fileReader;
 
 class Sound extends Component {
@@ -88,9 +87,7 @@ class Sound extends Component {
         fileReader = new FileReader();
         fileReader.onloadend = this.handleFileRead;
         fileReader.readAsArrayBuffer(event.target.files[0]);
-        URLReader = new FileReader();
-        URLReader.onloadend = this.handleURLRead;
-        URLReader.readAsDataURL(event.target.files[0]);
+        this.setState({ soundSrc: URL.createObjectURL(event.target.files[0]) });
       }
     }
   }
@@ -102,7 +99,7 @@ class Sound extends Component {
     // console.log(typedArray)
 
     fileData = [...typedArray];
-    // console.log(fileData);
+    console.log(fileData);
     
     this.readDataSize(fileData);
     
@@ -232,10 +229,6 @@ class Sound extends Component {
     } else {
       alert("Text is empty or no sound file!");
     }
-  }
-  
-  handleURLRead = (e) => {
-    this.setState({ soundSrc: fileReader.result })
   }
 
   downloadExtended = async (content) => {

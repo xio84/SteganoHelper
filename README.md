@@ -13,3 +13,18 @@
         <br>
     </b>
 </h2>
+
+## Deskripsi
+Sebuah alat yang dapat menyimpan pesan teks/file ke dalam file gambar (.jpg)/video (.avi)/audio (.wav)
+
+## Cara menjalankan
+```
+npm install
+npm run start
+```
+Lalu jalankan sesuai yang ada di tampilan
+
+## Dibuat oleh
+13517020 / T. Antra Oksidian Tafly
+13517036 / Willsen S.
+13517145 / Al Terra

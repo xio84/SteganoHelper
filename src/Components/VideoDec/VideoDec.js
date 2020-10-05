@@ -2,7 +2,7 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./VideoDec.css";
-var seedrandom = require('seedrandom');
+// var seedrandom = require('seedrandom');
 // import { text } from "@fortawesome/fontawesome-svg-core";
 
 let ExtVigenere = require("../../backend/extendedVigenere");
@@ -12,22 +12,22 @@ const truncate = (input) => {
 }
 
 // http://stackoverflow.com/questions/962802#962890
-function deshuffle(array, seed) {
-  var num, tmp, l = array.length;
-  var myrng = new seedrandom(seed);
-  let seedNum = [];
-  for (var i=0; i<array.length; i++) {
-    seedNum.push(Math.abs(myrng.int32()));
-  }
-  console.log(seedNum);
-  for (i=array.length-1; i>=0; i--) {
-    num = seedNum.pop();
-    tmp = array[num % l];
-    array[num % l] = array[i];
-    array[i] = tmp;
-  }
-  return array;
-}
+// function deshuffle(array, seed) {
+//   var num, tmp, l = array.length;
+//   var myrng = new seedrandom(seed);
+//   let seedNum = [];
+//   for (var i=0; i<array.length; i++) {
+//     seedNum.push(Math.abs(myrng.int32()));
+//   }
+//   console.log(seedNum);
+//   for (i=array.length-1; i>=0; i--) {
+//     num = seedNum.pop();
+//     tmp = array[num % l];
+//     array[num % l] = array[i];
+//     array[i] = tmp;
+//   }
+//   return array;
+// }
 
 let fileData = [];
 
