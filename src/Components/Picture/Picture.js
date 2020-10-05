@@ -129,7 +129,8 @@ class Picture extends Component {
     fileType: "",
     fileName: "",
     text: "",
-    dataSize: 0
+    dataSize: 0,
+    extension: ""
   }
 
   onTextChange = event => {
@@ -421,6 +422,7 @@ class Picture extends Component {
 
     if (this.state.text !== "" && fileData !== []) {
       let array = [];
+      this.state.text += "()"
       this.state.text += fileType
       this.state.text += "{}"
       let ordered = false
@@ -442,69 +444,69 @@ class Picture extends Component {
       ctx.drawImage(img,0,0)
       
       // Stegano BPCS     
-      // let bitMap = this.constructBitMap(ctx, c.width, c.height)
-      // bitMap = this.analyzeAndHide(bitMap, array, true)
-      // this.assembleResult(c, bitMap, c.width, c.height)
+      let bitMap = this.constructBitMap(ctx, c.width, c.height)
+      bitMap = this.analyzeAndHide(bitMap, array, false, 10)
+      this.assembleResult(c, bitMap, c.width, c.height)
 
 
 
       // Stegano LSB
-      let x = 0
-      let y = 0
-      if (ordered){
-        for (let i = 0; i < array.length; i++){
-          let bits = array[i].toString(2)
-          bits = "00000000".substr(bits.length) + bits;
-          for (let j = 0; j < 8; j+=3){
-            if (x == img.width){
-              y += 1
-              x = 0
-            }
-            let imgData = ctx.getImageData(x,y,1,1)
-            imgData.data[0] &= 254
-            imgData.data[1] &= 254
-            if (bits[j+2] !== undefined){
-              imgData.data[2] &= 254
-              imgData.data[2] += parseInt(bits.charAt(j+2))
-            }
-            imgData.data[1] += parseInt(bits.charAt(j+1))
-            imgData.data[0] += parseInt(bits.charAt(j))
-            ctx.putImageData(imgData, x, y)
-            x += 1
-          }
-        }
-      } else if (!ordered){
-        let listX = []
-        let listY = []
-        let rng = seedrandom(String.toString(seed))
-        for (let i = 0; i < array.length; i++){
-          let bits = array[i].toString(2)
-          bits = "00000000".substr(bits.length) + bits;
-          for (let j = 0; j < 8; j+=3){
-            let y = Math.round(rng() * (Math.floor(c.height-1)))
-            let x = Math.round(rng() * (Math.floor(c.width-1)))
-            listX.push(x)
-            listY.push(y)
-            if (x in listX && y in listY){
-              y = Math.round(rng() * (Math.floor(c.height-1)))
-              x = Math.round(rng() * (Math.floor(c.width-1)))
-            }
-            let imgData = ctx.getImageData(x,y,1,1)
-            imgData.data[0] &= 254
-            imgData.data[1] &= 254
-            if (bits[j+2] !== undefined){
-              imgData.data[2] &= 254
-              imgData.data[2] += parseInt(bits.charAt(j+2))
-            }
-            imgData.data[1] += parseInt(bits.charAt(j+1))
-            imgData.data[0] += parseInt(bits.charAt(j))
-            ctx.putImageData(imgData, x, y)
-            x += 1
-          }
-        }
-      }
-      let dest = document.getElementById('stegano-picture')
-      dest.src = c.toDataURL(fileType)
+      // let x = 0
+      // let y = 0
+      // if (ordered){
+      //   for (let i = 0; i < array.length; i++){
+      //     let bits = array[i].toString(2)
+      //     bits = "00000000".substr(bits.length) + bits;
+      //     for (let j = 0; j < 8; j+=3){
+      //       if (x == img.width){
+      //         y += 1
+      //         x = 0
+      //       }
+      //       let imgData = ctx.getImageData(x,y,1,1)
+      //       imgData.data[0] &= 254
+      //       imgData.data[1] &= 254
+      //       if (bits[j+2] !== undefined){
+      //         imgData.data[2] &= 254
+      //         imgData.data[2] += parseInt(bits.charAt(j+2))
+      //       }
+      //       imgData.data[1] += parseInt(bits.charAt(j+1))
+      //       imgData.data[0] += parseInt(bits.charAt(j))
+      //       ctx.putImageData(imgData, x, y)
+      //       x += 1
+      //     }
+      //   }
+      // } else if (!ordered){
+      //   let listX = []
+      //   let listY = []
+      //   let rng = seedrandom(String.toString(seed))
+      //   for (let i = 0; i < array.length; i++){
+      //     let bits = array[i].toString(2)
+      //     bits = "00000000".substr(bits.length) + bits;
+      //     for (let j = 0; j < 8; j+=3){
+      //       let y = Math.round(rng() * (Math.floor(c.height-1)))
+      //       let x = Math.round(rng() * (Math.floor(c.width-1)))
+      //       listX.push(x)
+      //       listY.push(y)
+      //       if (x in listX && y in listY){
+      //         y = Math.round(rng() * (Math.floor(c.height-1)))
+      //         x = Math.round(rng() * (Math.floor(c.width-1)))
+      //       }
+      //       let imgData = ctx.getImageData(x,y,1,1)
+      //       imgData.data[0] &= 254
+      //       imgData.data[1] &= 254
+      //       if (bits[j+2] !== undefined){
+      //         imgData.data[2] &= 254
+      //         imgData.data[2] += parseInt(bits.charAt(j+2))
+      //       }
+      //       imgData.data[1] += parseInt(bits.charAt(j+1))
+      //       imgData.data[0] += parseInt(bits.charAt(j))
+      //       ctx.putImageData(imgData, x, y)
+      //       x += 1
+      //     }
+      //   }
+      // }
+      // let dest = document.getElementById('stegano-picture')
+      // dest.src = c.toDataURL(fileType)
 
       let imgOld = document.getElementById('src-picture')
       let cOld = document.createElement('canvas')
@@ -544,165 +546,196 @@ class Picture extends Component {
       c.height = img.height
       let ctx = c.getContext("2d")
       ctx.drawImage(img,0,0)
-
+      let result = ""
       // Decrypt BPCS
-      // if (ordered){
-      //   let bitMap = this.constructBitMap(ctx, c.width, c.height)
-      //   let temp = ""
-      //   let result = ""
-      //   let checkerBoard = this.checkerBoardMake()
-      //   for (let i = 0; i < bitMap.length; i++){
+      if (ordered){
+        let bitMap = this.constructBitMap(ctx, c.width, c.height)
+        let temp = ""
+        let checkerBoard = this.checkerBoardMake()
+        for (let i = 0; i < bitMap.length; i++){
           
-      //     if (this.evaluateComplexity(bitMap[i]) > 0.3){
-      //       let flagXORed = true
-      //       let amp = this.findAmplifiedMinified(i, bitMap.length-1)
-      //       for (let k = 0; k < 64; k++){
-      //         if (bitMap[i][k] !== bitMap[amp][k]){
-      //           flagXORed = false
-      //         }            
-      //       }
+          if (this.evaluateComplexity(bitMap[i]) > 0.3){
+            let flagXORed = true
+            let amp = this.findAmplifiedMinified(i, bitMap.length-1)
+            for (let k = 0; k < 64; k++){
+              if (bitMap[i][k] !== bitMap[amp][k]){
+                flagXORed = false
+              }            
+            }
             
-      //       if (flagXORed){
-      //         for (let k = 0; k < 64; k++){
-      //           bitMap[i][k] ^= checkerBoard[k]
-      //         }
-      //       }
+            if (flagXORed){
+              for (let k = 0; k < 64; k++){
+                bitMap[i][k] ^= checkerBoard[k]
+              }
+            }
 
-      //       for (let j = 0; j < bitMap[i].length; j++){
-      //         if (result[result.length-1] === '}' && result[result.length-2] === '{'){
-      //           break
-      //         }
-      //         temp += bitMap[i][j]
-      //         if (temp.length == 8){
-      //           let res = parseInt(temp,2)
-      //           result += String.fromCharCode(res)
-      //           temp = ""
-      //         }
+            for (let j = 0; j < bitMap[i].length; j++){
+              if (result[result.length-1] === '}' && result[result.length-2] === '{'){
+                break
+              }
+              temp += bitMap[i][j]
+              if (temp.length == 8){
+                let res = parseInt(temp,2)
+                result += String.fromCharCode(res)
+                temp = ""
+              }
               
-      //       }
-      //       if (result[result.length-1] === '}' && result[result.length-2] === '{'){
-      //         result = result.substring(0, result.length - 2)
-      //         break
-      //       }
-      //     }     
-      //   }
-      //   console.log(result)
-      // } else if (!ordered){
-      //   let rng = seedrandom(String.toString(seed))
-      //   let result = ""
-      //   while(1){
+            }
+            if (result[result.length-1] === '}' && result[result.length-2] === '{'){
+              result = result.substring(0, result.length - 2)
+              break
+            }
+          }     
+        }
+        console.log(result)
+      } else if (!ordered){
+        let rng = seedrandom(String.toString(seed))
+        while(1){
           
-      //     let bitMap = this.constructBitMap(ctx, c.width, c.height)
-      //     let temp = ""
-      //     let checkerBoard = this.checkerBoardMake()
+          let bitMap = this.constructBitMap(ctx, c.width, c.height)
+          let temp = ""
+          let checkerBoard = this.checkerBoardMake()
           
-      //     let filled = []
-      //     let row = Math.round(rng() * (Math.floor(bitMap.length/2)))
-      //     if (row in filled){
-      //       row = Math.round(rng() * (Math.floor(bitMap.length/2)))
-      //     }
-      //     filled.push(row)
-      //     let flagXORed = true
-      //     let amp = this.findAmplifiedMinified(row, bitMap.length-1)
-      //     for (let k = 0; k < 64; k++){
-      //       if (bitMap[row][k] !== bitMap[amp][k]){
-      //         flagXORed = false
-      //       }            
-      //     }
+          let filled = []
+          let row = Math.round(rng() * (Math.floor(bitMap.length/2)))
+          if (row in filled){
+            row = Math.round(rng() * (Math.floor(bitMap.length/2)))
+          }
+          filled.push(row)
+          let flagXORed = true
+          let amp = this.findAmplifiedMinified(row, bitMap.length-1)
+          for (let k = 0; k < 64; k++){
+            if (bitMap[row][k] !== bitMap[amp][k]){
+              flagXORed = false
+            }            
+          }
           
-      //     if (flagXORed){
-      //       for (let k = 0; k < 64; k++){
-      //         bitMap[row][k] ^= checkerBoard[k]
-      //       }
-      //     }
-      //     console.log(bitMap[row])
+          if (flagXORed){
+            for (let k = 0; k < 64; k++){
+              bitMap[row][k] ^= checkerBoard[k]
+            }
+          }
 
-      //     for (let j = 0; j < bitMap[row].length; j++){
-      //       if (result[result.length-1] === '}' && result[result.length-2] === '{'){
-      //         break
-      //       }
-      //       temp += bitMap[row][j]
-      //       if (temp.length == 8){
-      //         let res = parseInt(temp,2)
-      //         result += String.fromCharCode(res)
-      //         temp = ""
-      //       }
-      //     }
-      //     if (result[result.length-1] === '}' && result[result.length-2] === '{'){
-      //       result = result.substring(0, result.length - 2);
-      //       break
-      //     }
-      //   }
-      //   console.log(result)
-      // }
+          for (let j = 0; j < bitMap[row].length; j++){
+            if (result[result.length-1] === '}' && result[result.length-2] === '{'){
+              break
+            }
+            temp += bitMap[row][j]
+            if (temp.length == 8){
+              let res = parseInt(temp,2)
+              result += String.fromCharCode(res)
+              temp = ""
+            }
+          }
+          if (result[result.length-1] === '}' && result[result.length-2] === '{'){
+            result = result.substring(0, result.length - 2);
+            break
+          }
+        }
+        console.log(result)
+      }
+      let ext = ""
+      for (let i = result.length-1; i > 0; i--){
+        if (result[i] === ")"){
+          console.log(i-1)
+          result = result.substring(0, i-1);
+          break
+        }
+        ext += result[i]        
+      }
+      console.log(result)
+      ext = ext.split("")
+      ext = ext.reverse()
+      ext = ext.join("")
+      console.log(ext)
+      this.setState({
+        extension:ext
+      })
 
       
 
       //Decrypt LSB
-      let im = ctx.getImageData(0,0,c.width,c.height)
-      console.log(im)
-      let bits = "";
-      let text = ""
-      if (ordered){
-        for (let i = 0; i < img.height; i++){
-          for (let j = 0; j < img.width; j++){
-            if (text[text.length-1] === '}' && text[text.length-2] === '{'){
-              break
-            }
-            let imgData = ctx.getImageData(j,i,1,1)
+      // let im = ctx.getImageData(0,0,c.width,c.height)
+      // console.log(im)
+      // let bits = "";
+      // let text = ""
+      // if (ordered){
+      //   for (let i = 0; i < img.height; i++){
+      //     for (let j = 0; j < img.width; j++){
+      //       if (text[text.length-1] === '}' && text[text.length-2] === '{'){
+      //         break
+      //       }
+      //       let imgData = ctx.getImageData(j,i,1,1)
             
-            bits += imgData.data[0] & 1;
-            bits += imgData.data[1] & 1;
+      //       bits += imgData.data[0] & 1;
+      //       bits += imgData.data[1] & 1;
 
-            if (bits.length + 1 < 8){
-              bits += imgData.data[2] & 1;
-            }
-            if (bits.length >= 8){
-              let res = (parseInt(bits,2))
-              text += String.fromCharCode(res)
-              bits = ""
-            }
+      //       if (bits.length + 1 < 8){
+      //         bits += imgData.data[2] & 1;
+      //       }
+      //       if (bits.length >= 8){
+      //         let res = (parseInt(bits,2))
+      //         text += String.fromCharCode(res)
+      //         bits = ""
+      //       }
     
-          }
-          if (text[text.length-1] === '}' && text[text.length-2] === '{'){
-            text = text.substring(0, text.length - 2);
-            break
-          }
-        }
-      } else if (!ordered){
-        let rng = seedrandom(String.toString(seed))
-        let listX = []
-        let listY = []
-        while(1){
-          if (text[text.length-1] === '}' && text[text.length-2] === '{'){
-            text = text.substring(0, text.length - 2);
-            break
-          }
-          let y = Math.round(rng() * (Math.floor(c.height-1)))
-          let x = Math.round(rng() * (Math.floor(c.width-1)))
-          listX.push(x)
-          listY.push(y)
-          if (x in listX && y in listY){
-            y = Math.round(rng() * (Math.floor(c.height-1)))
-            x = Math.round(rng() * (Math.floor(c.width-1)))
-          }
+      //     }
+      //     if (text[text.length-1] === '}' && text[text.length-2] === '{'){
+      //       text = text.substring(0, text.length - 2);
+      //       break
+      //     }
+      //   }
+      // } else if (!ordered){
+      //   let rng = seedrandom(String.toString(seed))
+      //   let listX = []
+      //   let listY = []
+      //   while(1){
+      //     if (text[text.length-1] === '}' && text[text.length-2] === '{'){
+      //       text = text.substring(0, text.length - 2);
+      //       break
+      //     }
+      //     let y = Math.round(rng() * (Math.floor(c.height-1)))
+      //     let x = Math.round(rng() * (Math.floor(c.width-1)))
+      //     listX.push(x)
+      //     listY.push(y)
+      //     if (x in listX && y in listY){
+      //       y = Math.round(rng() * (Math.floor(c.height-1)))
+      //       x = Math.round(rng() * (Math.floor(c.width-1)))
+      //     }
           
-          let imgData = ctx.getImageData(x,y,1,1)
+      //     let imgData = ctx.getImageData(x,y,1,1)
             
-            bits += imgData.data[0] & 1;
-            bits += imgData.data[1] & 1;
+      //       bits += imgData.data[0] & 1;
+      //       bits += imgData.data[1] & 1;
 
-            if (bits.length + 1 < 8){
-              bits += imgData.data[2] & 1;
-            }
-            if (bits.length >= 8){
-              let res = (parseInt(bits,2))
-              text += String.fromCharCode(res)
-              bits = ""
-            }
-        }
-      }
-      console.log(text)
+      //       if (bits.length + 1 < 8){
+      //         bits += imgData.data[2] & 1;
+      //       }
+      //       if (bits.length >= 8){
+      //         let res = (parseInt(bits,2))
+      //         text += String.fromCharCode(res)
+      //         bits = ""
+      //       }
+      //   }
+      // }
+      // console.log(text)
+      // let ext = ""
+      // for (let i = text.length-1; i > 0; i--){
+      //   if (text[i] === ")"){
+      //     console.log(i-1)
+      //     text = text.substring(0, i-1);
+      //     break
+      //   }
+      //   ext += text[i]        
+      // }
+      // console.log(text)
+      // ext = ext.split("")
+      // ext = ext.reverse()
+      // ext = ext.join("")
+      // console.log(ext)
+      // this.setState({
+      //   extension:ext
+      // })
     } else {
       alert("No paint file!");
     }
