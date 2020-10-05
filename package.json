@@ -1,6 +1,6 @@
 {
   "homepage": "https://xio84.github.io/SteganoHelper",
-  "name": "ste-helper",
+  "name": "stegano-helper",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
