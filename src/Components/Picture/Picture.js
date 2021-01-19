@@ -2,6 +2,7 @@ import React, { Component } from "react";
 // import Select from "react-select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Picture.css";
+import { compareDependencies } from "mathjs";
 // import { parse } from "mathjs";
 // import { text } from "@fortawesome/fontawesome-svg-core";
 // import { randomInt } from "mathjs";
@@ -329,7 +330,7 @@ class Picture extends Component {
     let checkerBoard = this.checkerBoardMake()
     let rng = seedrandom(String.toString(seed))
 
-    console.log(message)
+    console.log(ordered)
     for (let i = 0; i < message.length; i += 8){
       if (ordered){
         while (j < bitMap.length) {
@@ -343,6 +344,7 @@ class Picture extends Component {
                 bitMap[j][(8*p)+q] = bits[q]
               }
             }
+            console.log(bitMap[j])
             j += 1
             chunk += 1
             if (this.evaluateComplexity(bitMap[j]) < 0.3) {
@@ -449,8 +451,6 @@ class Picture extends Component {
     let img = document.getElementById('src-picture')
     let c2 = document.createElement('canvas')
     let bit = this.constructBitMap(ctx, width, height)
-    console.log(bit[495])
-    console.log(bitMap[495])
     let ctx3 = c2.getContext("2d")
     ctx3.drawImage(img,0,0)
     console.log(ctx3.getImageData(0,0,c.width,c.height))
@@ -501,7 +501,7 @@ class Picture extends Component {
       // Stegano BPCS     
       if (this.state.bpcs){
         let bitMap = this.constructBitMap(ctx, c.width, c.height)
-        bitMap = this.analyzeAndHide(bitMap, array, this.state.randomize, seed)
+        bitMap = this.analyzeAndHide(bitMap, array, !this.state.randomize, seed)
         this.assembleResult(c, bitMap, c.width, c.height)
       }else{
       // Stegano LSB
@@ -809,11 +809,6 @@ class Picture extends Component {
           }
           console.log(result)
         }
-        targetData = [];
-        for (let i = 0; i < result.length; i++) {
-          targetData.push(result.charCodeAt(i));
-        }
-        targetData = ExtVigenere.decrypt(targetData, this.state.key);
         let ext = ""
         for (let i = result.length-1; i > 0; i--){
           if (result[i] === ")"){
@@ -823,6 +818,13 @@ class Picture extends Component {
           }
           ext += result[i]        
         }
+        targetData = [];
+        for (let i = 0; i < result.length; i++) {
+          targetData.push(result.charCodeAt(i));
+        }
+        targetData = ExtVigenere.decrypt(targetData, this.state.key);
+        
+        
         console.log(result)
         ext = ext.split("")
         ext = ext.reverse()
@@ -1000,11 +1002,11 @@ class Picture extends Component {
                 <label htmlFor="file-input">
                   <FontAwesomeIcon icon={this.state.fileName === "" ? "file-upload" : "file"} /> &nbsp; {this.state.fileName === "" ? "Upload" : truncate(this.state.fileName)}
                 </label>
-                <img id="src-picture" alt={this.state.fileName} src={this.state.pictureSrc} width="200px" height="200px"></img>
+                <img id="src-picture" alt={this.state.fileName} src={this.state.pictureSrc}></img>
                 <button className="encrypt-button" type="submit">
                   <FontAwesomeIcon icon="lock" /> &nbsp; Encrypt
                 </button>
-                <img id="stegano-picture" alt={this.state.steganoName} src={this.state.steganoSrc} width="200px" height="200px"></img>
+                <img id="stegano-picture" alt={this.state.steganoName} src={this.state.steganoSrc}></img>
               </div>
               {/* <button onClick={this.handleDecrypt}>HELP</button> */}
             </form>
